@@ -11,7 +11,7 @@
 #define NORMALS 1
 #define TEXCOORDS 2
 
-#define MAX_LIGHTS 9
+#define MAX_LIGHTS 1
 #define ATTRIBS_PER_LIGHT 11
 
 // The storage for matrices
@@ -35,12 +35,6 @@ private:
 	GLint matShininessID;
 	GLint matTransparencyID;
 
-	GLint useTexturesID;
-	GLint woodDiffuseID;
-	GLint woodSpecularID;
-	GLint bambooDiffuseID;
-	GLint bambooSpecularID;
-	GLint maskID;
 
 	GLint lightUniforms[MAX_LIGHTS][ATTRIBS_PER_LIGHT];
 	GLchar* lightAttribNames[ATTRIBS_PER_LIGHT] = { "isActive", "type", "position", "direction",
@@ -71,13 +65,6 @@ public:
 		matShininessID = getUniformLocation("mat.shininess");
 		matTransparencyID = getUniformLocation("mat.transparency");
 		
-		useTexturesID = getUniformLocation("useTextures");
-		woodDiffuseID = getUniformLocation("woodDiffuse");
-		woodSpecularID = getUniformLocation("woodSpecular");
-		bambooDiffuseID = getUniformLocation("bambooDiffuse");
-		bambooSpecularID = getUniformLocation("bambooSpecular");
-		maskID = getUniformLocation("mask");
-
 		std::string uniformName;
 		for (int i = 0; i < MAX_LIGHTS; i++) {
 			for (int j = 0; j < ATTRIBS_PER_LIGHT; j++) {
@@ -171,27 +158,6 @@ public:
 		Shader::loadBool(lightUniforms[lightId][0], light.isActive);
 		Shader::loadVec4(lightUniforms[lightId][2], lightPos);
 		Shader::loadVec4(lightUniforms[lightId][3], lightDir);
-	}
-	void enableTextures() {
-		Shader::loadBool(useTexturesID, true);
-	}
-	void disableTextures() {
-		Shader::loadBool(useTexturesID, false);
-	}
-	void loadWoodDiffuse(GLint id) {
-		Shader::loadInt(woodDiffuseID, id);
-	}
-	void loadWoodSpecular(GLint id) {
-		Shader::loadInt(woodSpecularID, id);
-	}
-	void loadBambooDiffuse(GLint id) {
-		Shader::loadInt(bambooDiffuseID, id);
-	}
-	void loadBambooSpecular(GLint id) {
-		Shader::loadInt(bambooSpecularID, id);
-	}
-	void loadMask(GLint id) {
-		Shader::loadInt(maskID, id);
 	}
 
 	void loadMatrices() {

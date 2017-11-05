@@ -55,15 +55,13 @@ public:
 	virtual void subLoadSpotLight(Light& light) {}
 	virtual void loadMaterial(Material& material) {}
 	virtual void loadMatrices() {}
-	virtual void enableTextures() {}
-	virtual void disableTextures() {}
 	virtual void loadTexture(GLint id) {}
-	virtual void loadWoodDiffuse(GLint id) {}
-	virtual void loadWoodSpecular(GLint id) {}
-	virtual void loadBambooDiffuse(GLint id) {}
-	virtual void loadBambooSpecular(GLint id) {}
-	virtual void loadMask(GLint id) {}
-	
+
+	virtual void loadVirtualColor(GLint id) {}
+	virtual void loadVirtualDepth(GLint id) {}
+	virtual void loadRealColor(GLint id) {}
+	virtual void loadRealDepth(GLint id) {}
+
 	void loadInt(GLint location, GLint i);
 	void loadFloat(GLint location, GLfloat f);
 	void loadBool(GLint location, bool b);

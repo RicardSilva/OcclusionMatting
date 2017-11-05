@@ -24,11 +24,9 @@ public:
 	}
 	virtual ~GameObject() {
 	}
-
-	vec3 getPosition() { return position; }
-	void setPosition(vec3 p) { position = p; }
-
+	
 	virtual void draw();
+	virtual void draw2();
 	virtual void update(float timeStep) {};
 
 };

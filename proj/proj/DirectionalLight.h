@@ -5,7 +5,7 @@
 
 struct DirectionalLight : public Light {
 	
-	void draw();
+	
 
 	DirectionalLight(vec4& direction, vec3& color, float intensity) : Light() {
 		this->type = directionalLight;
@@ -17,5 +17,6 @@ struct DirectionalLight : public Light {
 		shader->unUse();
 	}
 
+	void draw();
 
 };

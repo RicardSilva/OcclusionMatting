@@ -12,7 +12,7 @@ struct Light {
 	static int lightCounter;
 	Shader* shader;
 
-	int id;
+	int id = 0;
 	bool isActive = true;
 	lightType type;
 

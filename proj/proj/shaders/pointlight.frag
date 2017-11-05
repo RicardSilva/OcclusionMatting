@@ -37,17 +37,11 @@ struct Light {
 }; 
 
 // the set of lights to apply, per invocation of this shader
-const int MaxLights = 9;
+const int MaxLights = 1;
 uniform Light lights[MaxLights];
 
-uniform bool useTextures;
-uniform Material mat;
 
-uniform sampler2D woodDiffuse;
-uniform sampler2D woodSpecular;
-uniform sampler2D bambooDiffuse;
-uniform sampler2D bambooSpecular;
-uniform sampler2D mask;
+uniform Material mat;
 
 
 
@@ -148,27 +142,13 @@ void main() {
 	vec3 materialSpecular;
 	float materialTransparency;
 	vec3 normal;
-	if(useTextures) {
-		vec3 woodDiff = vec3(texture(woodDiffuse, DataIn.texCoord * 15));
-		vec3 bambooDiff = vec3(texture(bambooDiffuse, DataIn.texCoord * 10));
-		float mixCoefficient = (texture(mask, DataIn.texCoord)).r;
-		materialDiffuse = mix(woodDiff, bambooDiff, mixCoefficient);
-		colorOut += vec4(materialDiffuse * 0.1, 1);	
-		
-		
-		vec3 woodSpec = vec3(texture(woodSpecular, DataIn.texCoord * 15));
-		vec3 bambooSpec = vec3(texture(bambooSpecular, DataIn.texCoord * 10)) * 0.9;
-		materialSpecular = mix(woodSpec, bambooSpec, mixCoefficient) ;
-		materialTransparency = 1.0f;
-		
-		
-	}
-	else {
-		colorOut += vec4(mat.ambient.xyz, 1);	
-		materialDiffuse = mat.diffuse.xyz;
-		materialSpecular = mat.specular.xyz;
-		materialTransparency = mat.transparency;
-	}
+	
+	
+	colorOut += vec4(mat.ambient.xyz, 1);	
+	materialDiffuse = mat.diffuse.xyz;
+	materialSpecular = mat.specular.xyz;
+	materialTransparency = mat.transparency;
+	
 	
 	normal = normalize(DataIn.normal);
 	

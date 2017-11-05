@@ -1,27 +1,9 @@
 #include "GameManager.h"
 
 
-bool isOpenGLError() {
-	bool isError = false;
-	GLenum errCode;
-	const GLubyte *errString;
-	while ((errCode = glGetError()) != GL_NO_ERROR) {
-		isError = true;
-		errString = gluErrorString(errCode);
-		std::cerr << "OpenGL ERROR [" << errString << "]." << std::endl;
-	}
-	return isError;
-}
-void checkOpenGLError(std::string error)
-{
-	if (isOpenGLError()) {
-		std::cerr << error << std::endl;
-		getchar();
-		exit(EXIT_FAILURE);
-	}
-}
+
 void GameManager::onRefreshTimer(int value) {
-	if (!pause && !gameOver) {
+	if (!pause) {
 		int time = glutGet(GLUT_ELAPSED_TIME);
 		int timeStep = time - oldTime;
 		oldTime = time;
@@ -33,11 +15,12 @@ void GameManager::onRefreshTimer(int value) {
 	glutPostRedisplay();
 }
 
-
 void GameManager::init() {
 
 	srand(time(NULL));	// initialize seed of random
-	
+	fbo = new FrameBuffer();
+	virtualColorTexture = fbo->getColorTexture();
+	virtualDepthTexture = fbo->getDepthTexture();
 	initShaders();
 	initLights();
 	initMeshes();
@@ -50,9 +33,12 @@ void GameManager::init() {
 void GameManager::initShaders() {
 	shader = new LightShader("shaders/pointlight.vert", "shaders/pointlight.frag");
 	ShaderManager::instance()->addShader("lightShader", shader);
+
+	alphaShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/alphaMatting.frag");
+	ShaderManager::instance()->addShader("alphaShader", alphaShader);
 }
 void GameManager::initLights() {
-	directionalLight = new DirectionalLight(vec4(1, -1, 1, 0), vec3(1, 1, 1), 0.5f);
+	directionalLight = new DirectionalLight(vec4(0, 0, -1, 0), vec3(1, 1, 1), 0.5f);
 }
 void GameManager::initMeshes() {
 	ObjLoader* loader = new ObjLoader();
@@ -60,6 +46,7 @@ void GameManager::initMeshes() {
 		
 	std::vector<pair<string, string>> modelsToLoad;
 	modelsToLoad.push_back(std::make_pair("cube", "objs/cube.obj"));
+	modelsToLoad.push_back(std::make_pair("plane", "objs/plane.obj"));
 
 	for (auto m : modelsToLoad) {
 		if (loader->LoadFile(m.second)) {
@@ -85,19 +72,66 @@ void GameManager::initCameras() {
 
 }
 void GameManager::initGameObjects() {
-	Shader* shader = ShaderManager::instance()->getShader("lightShader");
-	ObjModel* model = ModelManager::instance()->getModel("cube");
+	Shader* shader;
+	ObjModel* model;
+
+	shader = ShaderManager::instance()->getShader("lightShader");
+	model = ModelManager::instance()->getModel("cube");
 	cube = new GameObject(vec3(0,0,0), shader, model);
+
+	shader = ShaderManager::instance()->getShader("alphaShader");
+	model = ModelManager::instance()->getModel("plane");
+	plane = new GameObject(vec3(0, 0, 0), shader, model);
+
 
 	//pauseTexture = new TextureHolder("textures/pause_texture.tga", 7);
 	//gameOverTexture = new TextureHolder("textures/gameOver_texture.tga", 8);
 }
 
 
+
+void GameManager::update(double timeStep) {
+
+}
+void GameManager::display() {	
+	FrameCount++;
+	fbo->bindFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	fbo->unbindCurrentFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	loadIdentity(MODEL);	
+	activeCamera->computeView();
+	activeCamera->computeProjection(WIDTH, HEIGHT);
+
+	directionalLight->draw();
+	// Render objects
+
+	fbo->bindFrameBuffer();
+	cube->draw();
+	fbo->unbindCurrentFrameBuffer();
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, virtualColorTexture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, virtualDepthTexture);
+	glActiveTexture(GL_TEXTURE2);
+	/*glBindTexture(GL_TEXTURE_2D, dudvTexture);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, normalTexture);*/
+
+	plane->draw();
+
+
+	glutSwapBuffers();
+	
+}
+
+
+
 void GameManager::idle() {
 	// do nothing
 }
-
 void GameManager::keydown(int key) {
 	// key = pressed key
 	key = tolower(key);
@@ -108,7 +142,6 @@ void GameManager::keydown(int key) {
 	}
 
 }
-
 void GameManager::keyup(int key) {
 	//// key = pressed key
 	//key = tolower(key);
@@ -128,24 +161,22 @@ void GameManager::keyup(int key) {
 	//}
 
 }
-
 void GameManager::specialKeydown(int key) {
 	/*switch (key) {
 	case GLUT_KEY_RIGHT:
-		car->turnRight = true;
-		break;
+	car->turnRight = true;
+	break;
 	case GLUT_KEY_LEFT:
-		car->turnLeft = true;
-		break;
+	car->turnLeft = true;
+	break;
 	case GLUT_KEY_UP:
-		car->goForward = true;
-		break;
+	car->goForward = true;
+	break;
 	case GLUT_KEY_DOWN:
-		car->goBack = true;
-		break;
+	car->goBack = true;
+	break;
 	}*/
 }
-
 void GameManager::specialKeyup(int key) {
 	//switch (key) {
 	//case GLUT_KEY_RIGHT:
@@ -162,42 +193,10 @@ void GameManager::specialKeyup(int key) {
 	//	break;
 	//}
 }
-
-void GameManager::mouseButtons(int button, int state, int xx, int yy){}
-
+void GameManager::mouseButtons(int button, int state, int xx, int yy) {}
 // Track mouse motion while buttons are pressed
-
 void GameManager::mouseMotion(int xx, int yy) {}
-
 void GameManager::mouseWheel(int wheel, int direction, int x, int y) {}
-
-
-void GameManager::display() {	
-	FrameCount++;
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	loadIdentity(MODEL);	
-	activeCamera->computeView();
-	activeCamera->computeProjection(WIDTH, HEIGHT);
-
-	shader->use();
-	directionalLight->draw();
-	// Render objects
-	cube->draw();
-
-	shader->unUse();
-	glutSwapBuffers();
-	
-}
-
-
-void GameManager::update(double timeStep) {
-
-}
-
-
-
-
-
 
 void GameManager::reshape(GLsizei w, GLsizei h) {
 	// When viewport is resized, objects scale with it
@@ -221,4 +220,24 @@ void GameManager::reshapeAVT(GLsizei w, GLsizei h) {
 	ratio = (1.0f * w) / h;
 	loadIdentity(PROJECTION);
 	perspective(53.13f, ratio, 0.1f, 1000.0f);
+}
+
+bool isOpenGLError() {
+	bool isError = false;
+	GLenum errCode;
+	const GLubyte *errString;
+	while ((errCode = glGetError()) != GL_NO_ERROR) {
+		isError = true;
+		errString = gluErrorString(errCode);
+		std::cerr << "OpenGL ERROR [" << errString << "]." << std::endl;
+	}
+	return isError;
+}
+void checkOpenGLError(std::string error)
+{
+	if (isOpenGLError()) {
+		std::cerr << error << std::endl;
+		getchar();
+		exit(EXIT_FAILURE);
+	}
 }

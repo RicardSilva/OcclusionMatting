@@ -16,13 +16,14 @@
 #include "ModelManager.h"
 #include "ObjLoader.h"
 #include "LightShader.h"
+#include "AlphaShader.h"
 #include "AVTmathLib.h"
-#include "TextureHolder.h"
 
 #include "Light.h"
 #include "DirectionalLight.h"
 #include "GameObject.h"
 #include "Mesh.h"
+#include "FrameBuffer.h"
 
 
 #define WIDTH 1200
@@ -35,16 +36,22 @@ class GameManager {
 
 	//GAME LOGIC
 	bool pause = false;
-	bool gameOver = false;
 
 	// Frame counting and FPS computation
 	unsigned int FrameCount = 0;
 	char s[32];
 
 	Shader* shader;
+	Shader* alphaShader;
 	Camera* activeCamera;
 	Light* directionalLight;
-	GameObject* cube;
+	GameObject* cube, *plane;
+	FrameBuffer* fbo;
+
+	GLuint virtualColorTexture;
+	GLuint virtualDepthTexture;
+	GLuint realColorTexture;
+	GLuint realDepthTexture;
 
 public:
 	GameManager() {}

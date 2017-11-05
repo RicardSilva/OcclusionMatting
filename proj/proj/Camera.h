@@ -21,21 +21,14 @@ public:
 	void setEye(vec3& v) {
 		eye = v;
 	}
-	vec3 getEye() {
-		return eye;
-	}
 	void setTarget(vec3& v) {
 		target = v;
 	}
-	vec3 getTarget() { return target;}
 	void setUp(vec3& v) {
 		up = v;
 	}
 	void computeView();
 	virtual void computeProjection(int w, int h) = 0;
-	void computeCarCameraPosition(const vec3& pos, int angle);
-	void computeCockpitCameraPosition(const vec3& pos, int angle);
-	void computeBackCameraPosition(const vec3& pos, int angle);
 	
 
 	

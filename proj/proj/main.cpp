@@ -8,11 +8,6 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-
-
-#define ORANGE_DELAY 7000
-#define ORANGE_INIT 2000
-
 #define CAPTION "MicroMachines"
 int WindowHandle = 0;
 int WinX = 1200, WinY = 900;
