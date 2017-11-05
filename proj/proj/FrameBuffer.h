@@ -4,8 +4,8 @@
 #include "GL/freeglut.h"
 class FrameBuffer {
 
-	int WIDTH = 1024;
-	int HEIGHT = 768;
+	int WIDTH = 1200;
+	int HEIGHT = 900;
 
 	GLuint frameBuffer;
 	GLuint colorTexture;
@@ -45,7 +45,6 @@ private:
 	void bindFrameBuffer(int frameBuffer, int width, int height) {
 		glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-		//glViewport(0, 0, width, height);
 	}
 
 	int createFrameBuffer() {
@@ -72,6 +71,7 @@ private:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 			texture, 0);
+		glBindTexture(GL_TEXTURE_2D, texture);
 		return texture;
 	}
 	int createDepthTextureAttachment(int width, int height) {
@@ -86,15 +86,5 @@ private:
 			texture, 0);
 		return texture;
 	}
-	//int createDepthBufferAttachment(int width, int height) {
-	//	GLuint depthBuffer;
-	//	glGenRenderbuffers(1, &depthBuffer);
-	//	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-	//	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width,
-	//		height);
-	//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-	//		GL_RENDERBUFFER, depthBuffer);
-	//	return depthBuffer;
-	//}
 
 };

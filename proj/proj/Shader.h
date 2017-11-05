@@ -42,6 +42,7 @@ public:
 
 	virtual void bindAttributes(void) = 0;
 	virtual void getUniformLocations(void) = 0;
+	virtual void bindTextureUnits() {}
 
 	virtual void loadProjViewModelMatrix(float* matrix) {}
 	virtual void loadViewModelMatrix(float* matrix) {}

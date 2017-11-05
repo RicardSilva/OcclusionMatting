@@ -3,7 +3,7 @@
 
 in vec2 texC;
 
-out vec4 colorOut;
+layout(location = 0) out vec4 colorOut;
 
 
 uniform sampler2D virtualColor;
@@ -16,8 +16,16 @@ uniform sampler2D realDepth;
 
 void main() {
 
-	colorOut = texture(virtualColor, texC);
-	//colorOut = vec4(0,0,1,1);
+	
+	
+	float z = texture(virtualDepth, texC).r;      // fetch the z-value from our depth texture
+	float n = 1.0;                                // the near plane
+	float f = 30.0;                               // the far plane
+	float c = (2.0 * n) / (f + n - z * (f - n));  // convert to linear values 
+	 
+	colorOut = vec4(c,c,c,1);                      // linear
+	
+	//colorOut = texture(virtualColor, texC);
 		
 	
 }

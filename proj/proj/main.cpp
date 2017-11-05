@@ -130,14 +130,14 @@ int main(int argc, char **argv) {
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
 	glClearColor(0.53, 0.81, 0.92, 1);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	gm = new GameManager();
 	gm->init();
 	
 	//  GLUT main loop
 	glutMainLoop();
-
+	delete(gm);
 	return(0);
 
 }

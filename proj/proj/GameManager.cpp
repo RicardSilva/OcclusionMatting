@@ -35,6 +35,9 @@ void GameManager::initShaders() {
 	ShaderManager::instance()->addShader("lightShader", shader);
 
 	alphaShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/alphaMatting.frag");
+	alphaShader->use();
+	alphaShader->bindTextureUnits();
+	alphaShader->unUse();
 	ShaderManager::instance()->addShader("alphaShader", alphaShader);
 }
 void GameManager::initLights() {
@@ -106,7 +109,6 @@ void GameManager::display() {
 
 	directionalLight->draw();
 	// Render objects
-
 	fbo->bindFrameBuffer();
 	cube->draw();
 	fbo->unbindCurrentFrameBuffer();

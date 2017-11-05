@@ -7,7 +7,7 @@
 #include <sstream>
 
 #define VERTICES 0
-#define TEXCOORDS 1
+#define TEXCOORDS 2
 
 // The storage for matrices
 extern float mMatrix[COUNT_MATRICES][16];
@@ -32,7 +32,6 @@ public:
 		: Shader(vertexShader, fragmentShader) {
 		bindAttributes();
 		getUniformLocations();
-		bindTextureUnits();
 	}
 	virtual ~AlphaShader() {
 	}
