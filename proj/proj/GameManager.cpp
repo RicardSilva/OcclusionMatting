@@ -3,15 +3,12 @@
 
 
 void GameManager::onRefreshTimer(int value) {
-	if (!pause) {
-		int time = glutGet(GLUT_ELAPSED_TIME);
-		int timeStep = time - oldTime;
-		oldTime = time;
-		update(timeStep);
-	}
-	else {
-		oldTime = glutGet(GLUT_ELAPSED_TIME);
-	}
+	/*
+	int time = glutGet(GLUT_ELAPSED_TIME);
+	int timeStep = time - oldTime;
+	oldTime = time;*/
+	update(0);
+	
 	glutPostRedisplay();
 }
 
@@ -26,10 +23,58 @@ void GameManager::init() {
 	initMeshes();
 	initCameras();
 	initGameObjects();
+	if (!initKinect())
+		std::cout << "error initializing kinect" << std::endl;
 
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, CWIDTH, CHEIGHT,
+		0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)colorData);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	realColorTexture = texture;
+
+	GLuint texture2;
+	glGenTextures(1, &texture2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, DWIDTH, DHEIGHT,
+		0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)depthData);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	realDepthTexture = texture;
 
 }
 
+bool GameManager::initKinect() {
+	if (FAILED(GetDefaultKinectSensor(&sensor))) {
+		return false;
+	}
+	if (sensor) {
+		sensor->Open();
+
+		IColorFrameSource* framesource = NULL;
+		sensor->get_ColorFrameSource(&framesource);
+		framesource->OpenReader(&colorReader);
+		if (framesource) {
+			framesource->Release();
+			framesource = NULL;
+		}
+		IDepthFrameSource* framesource2 = NULL;
+		sensor->get_DepthFrameSource(&framesource2);
+		framesource2->OpenReader(&depthReader);
+		if (framesource2) {
+			framesource2->Release();
+			framesource2 = NULL;
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
+}
 void GameManager::initShaders() {
 	shader = new LightShader("shaders/pointlight.vert", "shaders/pointlight.frag");
 	ShaderManager::instance()->addShader("lightShader", shader);
@@ -86,15 +131,15 @@ void GameManager::initGameObjects() {
 	model = ModelManager::instance()->getModel("plane");
 	plane = new GameObject(vec3(0, 0, 0), shader, model);
 
-
-	//pauseTexture = new TextureHolder("textures/pause_texture.tga", 7);
-	//gameOverTexture = new TextureHolder("textures/gameOver_texture.tga", 8);
 }
 
 
 
 void GameManager::update(double timeStep) {
-
+	getRgbData(colorData);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, CWIDTH, CHEIGHT, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)colorData);
+	getDepthData(depthData);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, DWIDTH, DHEIGHT, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)depthData);
 }
 void GameManager::display() {	
 	FrameCount++;
@@ -118,16 +163,52 @@ void GameManager::display() {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, virtualDepthTexture);
 	glActiveTexture(GL_TEXTURE2);
-	/*glBindTexture(GL_TEXTURE_2D, dudvTexture);
+	glBindTexture(GL_TEXTURE_2D, realColorTexture);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, normalTexture);*/
-
+	glBindTexture(GL_TEXTURE_2D, realDepthTexture);
+	
+	
 	plane->draw();
 
 
 	glutSwapBuffers();
 	
 }
+
+void GameManager::getDepthData(GLubyte* dest) {
+	IDepthFrame* frame = NULL;
+	if (SUCCEEDED(depthReader->AcquireLatestFrame(&frame))) {
+		unsigned int sz;
+		unsigned short* buf;
+		frame->AccessUnderlyingBuffer(&sz, &buf);
+
+		const unsigned short* curr = (const unsigned short*)buf;
+		const unsigned short* dataEnd = curr + (DWIDTH*DHEIGHT);
+
+		while (curr < dataEnd) {
+			// Get depth in millimeters
+			unsigned short depth = (*curr++);
+
+			// Draw a grayscale image of the depth:
+			// B,G,R are all set to depth%256, alpha set to 1.
+			for (int i = 0; i < 3; ++i)
+				*dest++ = (BYTE)depth % 256;
+			*dest++ = 0xff;
+		}
+	}
+	if (frame) frame->Release();
+}
+
+void GameManager::getRgbData(GLubyte* dest) {
+	IColorFrame* frame = NULL;
+	if (SUCCEEDED(colorReader->AcquireLatestFrame(&frame))) {
+		frame->CopyConvertedFrameDataToArray(CWIDTH*CHEIGHT * 4, colorData, ColorImageFormat_Bgra);
+	}
+	if (frame) frame->Release();
+
+}
+
+
 
 
 
@@ -144,62 +225,6 @@ void GameManager::keydown(int key) {
 	}
 
 }
-void GameManager::keyup(int key) {
-	//// key = pressed key
-	//key = tolower(key);
-	//switch (key) {
-	//case 'd':
-	//	car->turnRight = false;
-	//	break;
-	//case 's':
-	//	car->goBack = false;
-	//	break;
-	//case 'w':
-	//	car->goForward = false;
-	//	break;
-	//case 'a':
-	//	car->turnLeft = false;
-	//	break;
-	//}
-
-}
-void GameManager::specialKeydown(int key) {
-	/*switch (key) {
-	case GLUT_KEY_RIGHT:
-	car->turnRight = true;
-	break;
-	case GLUT_KEY_LEFT:
-	car->turnLeft = true;
-	break;
-	case GLUT_KEY_UP:
-	car->goForward = true;
-	break;
-	case GLUT_KEY_DOWN:
-	car->goBack = true;
-	break;
-	}*/
-}
-void GameManager::specialKeyup(int key) {
-	//switch (key) {
-	//case GLUT_KEY_RIGHT:
-	//	car->turnRight = false;
-	//	break;
-	//case GLUT_KEY_LEFT:
-	//	car->turnLeft = false;
-	//	break;
-	//case GLUT_KEY_UP:
-	//	car->goForward = false;
-	//	break;
-	//case GLUT_KEY_DOWN:
-	//	car->goBack = false;
-	//	break;
-	//}
-}
-void GameManager::mouseButtons(int button, int state, int xx, int yy) {}
-// Track mouse motion while buttons are pressed
-void GameManager::mouseMotion(int xx, int yy) {}
-void GameManager::mouseWheel(int wheel, int direction, int x, int y) {}
-
 void GameManager::reshape(GLsizei w, GLsizei h) {
 	// When viewport is resized, objects scale with it
 	float ratio = (float)WIDTH / HEIGHT;
@@ -210,18 +235,6 @@ void GameManager::reshape(GLsizei w, GLsizei h) {
 		glViewport((w - h*ratio) / 2.0f, 0, h*ratio, h);
 	else
 		glViewport(0, (h - w / ratio) / 2, w, w / ratio);
-}
-void GameManager::reshapeAVT(GLsizei w, GLsizei h) {
-	float ratio;
-	// Prevent a divide by zero, when window is too short
-	if (h == 0)
-		h = 1;
-	// set the viewport to be the entire window
-	glViewport(0, 0, w, h);
-	// set the projection matrix
-	ratio = (1.0f * w) / h;
-	loadIdentity(PROJECTION);
-	perspective(53.13f, ratio, 0.1f, 1000.0f);
 }
 
 bool isOpenGLError() {

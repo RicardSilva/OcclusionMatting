@@ -35,10 +35,16 @@ void refreshTimer(int value)
 	glutTimerFunc(1000 / 60, refreshTimer, 0);
 }
 
+void processKeys(unsigned char key, int xx, int yy)
+{
+	gm->keydown(key);
+}
+
 void reshape(int w, int h) {
 
 	gm->reshape(w, h);
 }
+
 
 void display(void) {
 	FrameCount++;
@@ -48,36 +54,7 @@ void display(void) {
 
 
 
-void processKeys(unsigned char key, int xx, int yy)
-{
-	gm->keydown(key);
-}
-void processKeysUps(unsigned char key, int xx, int yy)
-{
-	gm->keyup(key);
-}
-void processSpecialKeys(int key, int xx, int yy)
-{
-	gm->specialKeydown(key);
-}
-void processSpecialKeyUps(int key, int xx, int yy)
-{
-	gm->specialKeyup(key);
-}
 
-
-void processMouseButtons(int button, int state, int xx, int yy)
-{
-	gm->mouseButtons(button, state, xx, yy);
-}
-void processMouseMotion(int xx, int yy)
-{
-	gm->mouseMotion(xx, yy);
-}
-void mouseWheel(int wheel, int direction, int x, int y)
-{
-	gm->mouseWheel(wheel, direction, x, y);
-}
 
 
 
@@ -101,14 +78,6 @@ int main(int argc, char **argv) {
 	glutReshapeFunc(reshape);
 	//glutIdleFunc(renderScene);
 
-	//	Mouse and Keyboard Callbacks
-	glutKeyboardFunc(processKeys);
-	glutKeyboardUpFunc(processKeysUps);
-	glutSpecialFunc(processSpecialKeys);
-	glutSpecialUpFunc(processSpecialKeyUps);
-	glutMouseFunc(processMouseButtons);
-	glutMotionFunc(processMouseMotion);
-	glutMouseWheelFunc(mouseWheel);
 	glutTimerFunc(0, FPScounter, 0);
 	glutTimerFunc(0, refreshTimer, 0);
 
@@ -125,13 +94,13 @@ int main(int argc, char **argv) {
 	printf("Version: %s\n", glGetString(GL_VERSION));
 	printf("GLSL: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
+	//	Mouse and Keyboard Callbacks
+	glutKeyboardFunc(processKeys);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
 	glClearColor(0.53, 0.81, 0.92, 1);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	gm = new GameManager();
 	gm->init();
 	

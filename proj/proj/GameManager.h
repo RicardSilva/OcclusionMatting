@@ -9,7 +9,6 @@
 #include <array>
 #include "time.h"
 
-#include "OrthoCamera.h"
 #include "PerspectiveCamera.h"
 
 #include "ShaderManager.h"
@@ -25,17 +24,22 @@
 #include "Mesh.h"
 #include "FrameBuffer.h"
 
+#include <Ole2.h>
+#include <Windows.h>
+#include <Kinect.h>
+
+
+#define DWIDTH 512
+#define DHEIGHT 424
+#define CWIDTH 1920
+#define CHEIGHT 1080
 
 #define WIDTH 1200
 #define HEIGHT 900
 #define CAPTION "OcclusionMatting"
 
 class GameManager {
-
-	int oldTime = 0;	// miliseconds
-
-	//GAME LOGIC
-	bool pause = false;
+	int oldTime = 0;
 
 	// Frame counting and FPS computation
 	unsigned int FrameCount = 0;
@@ -53,6 +57,17 @@ class GameManager {
 	GLuint realColorTexture;
 	GLuint realDepthTexture;
 
+	GLubyte colorData[CWIDTH*CHEIGHT * 4];		// BGRA array that contains the texture data
+	GLubyte depthData[DWIDTH*DHEIGHT];			// Depth values stored in this array
+	GLubyte colortodepth[DWIDTH*DHEIGHT * 4];	// BGRA array that contains the mapped color data
+
+	
+	// Kinect variables
+	IKinectSensor* sensor;				// Kinect sensor
+	IColorFrameReader* colorReader;     // Kinect color data source
+	IDepthFrameReader* depthReader;		// Kinect depth data source
+
+
 public:
 	GameManager() {}
 
@@ -62,11 +77,11 @@ public:
 		delete(directionalLight);
 	}
 
-	bool getPause() { return pause; }
 
 	void onRefreshTimer(int value);
 
 	void init();
+	bool initKinect();
 	void initShaders();
 	void initLights();
 	void initMeshes();
@@ -75,20 +90,17 @@ public:
 
 
 	void idle();
-
 	void keydown(int key);
-	void keyup(int key);
-	void specialKeydown(int key);
-	void specialKeyup(int key);
 
-	void mouseButtons(int button, int state, int xx, int yy);
-	void mouseMotion(int xx, int yy);
-	void mouseWheel(int wheel, int direction, int x, int y);
+	void getDepthData(GLubyte* dest);
+	void getRgbData(GLubyte* dest);
+
+	
+
 	
 	void display();
 
 	void update(double timeStep);
 	void reshape(GLsizei w, GLsizei h);
-	void reshapeAVT(GLsizei w, GLsizei h);
 
 };
