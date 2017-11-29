@@ -2,13 +2,9 @@
 
 
 
-void GameManager::onRefreshTimer(int value) {
-	/*
-	int time = glutGet(GLUT_ELAPSED_TIME);
-	int timeStep = time - oldTime;
-	oldTime = time;*/
+void GameManager::onRefreshTimer(int value) {	
+
 	update(0);
-	
 	glutPostRedisplay();
 }
 
@@ -41,10 +37,10 @@ void GameManager::init() {
 	glBindTexture(GL_TEXTURE_2D, texture2);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, DWIDTH, DHEIGHT,
-		0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)depthData);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, CWIDTH, CHEIGHT,
+		0, GL_RED, GL_FLOAT, (float*)depthData);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	realDepthTexture = texture;
+	realDepthTexture = texture2;
 
 }
 
@@ -53,23 +49,13 @@ bool GameManager::initKinect() {
 		return false;
 	}
 	if (sensor) {
-		sensor->Open();
+		sensor->get_CoordinateMapper(&mapper);
 
-		IColorFrameSource* framesource = NULL;
-		sensor->get_ColorFrameSource(&framesource);
-		framesource->OpenReader(&colorReader);
-		if (framesource) {
-			framesource->Release();
-			framesource = NULL;
-		}
-		IDepthFrameSource* framesource2 = NULL;
-		sensor->get_DepthFrameSource(&framesource2);
-		framesource2->OpenReader(&depthReader);
-		if (framesource2) {
-			framesource2->Release();
-			framesource2 = NULL;
-		}
-		return true;
+		sensor->Open();
+		sensor->OpenMultiSourceFrameReader(
+			FrameSourceTypes::FrameSourceTypes_Depth | FrameSourceTypes::FrameSourceTypes_Color,
+			&reader);
+		return reader;
 	}
 	else {
 		return false;
@@ -111,7 +97,7 @@ void GameManager::initCameras() {
 
 	loadIdentity(VIEW);
 
-	Camera* sideCamera = new PerspectiveCamera(70, (float)WIDTH / HEIGHT, 0.1f, 150.0f);
+	Camera* sideCamera = new PerspectiveCamera(70, (float)WIDTH / HEIGHT, 0.1f, 30.0f);
 	sideCamera->setEye(vec3(0,0,10));
 	sideCamera->setTarget(vec3(0,0,0));
 	sideCamera->setUp(vec3(0,1,0));
@@ -136,10 +122,14 @@ void GameManager::initGameObjects() {
 
 
 void GameManager::update(double timeStep) {
-	getRgbData(colorData);
+	getKinectData();
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, realColorTexture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, CWIDTH, CHEIGHT, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)colorData);
-	getDepthData(depthData);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, DWIDTH, DHEIGHT, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)depthData);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, realDepthTexture);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, CWIDTH, CHEIGHT, GL_RED, GL_FLOAT, (float*)depthData);
 }
 void GameManager::display() {	
 	FrameCount++;
@@ -175,45 +165,67 @@ void GameManager::display() {
 	
 }
 
-void GameManager::getDepthData(GLubyte* dest) {
-	IDepthFrame* frame = NULL;
-	if (SUCCEEDED(depthReader->AcquireLatestFrame(&frame))) {
-		unsigned int sz;
-		unsigned short* buf;
-		frame->AccessUnderlyingBuffer(&sz, &buf);
 
-		const unsigned short* curr = (const unsigned short*)buf;
-		const unsigned short* dataEnd = curr + (DWIDTH*DHEIGHT);
+void GameManager::getDepthData(IMultiSourceFrame* frame, float* dest) {
+	IDepthFrame* depthframe;
+	IDepthFrameReference* frameref = NULL;
+	frame->get_DepthFrameReference(&frameref);
+	frameref->AcquireFrame(&depthframe);
+	if (frameref) frameref->Release();
 
-		while (curr < dataEnd) {
-			// Get depth in millimeters
-			unsigned short depth = (*curr++);
+	if (!depthframe) return;
 
-			// Draw a grayscale image of the depth:
-			// B,G,R are all set to depth%256, alpha set to 1.
-			for (int i = 0; i < 3; ++i)
-				*dest++ = (BYTE)depth % 256;
-			*dest++ = 0xff;
+	// Get data from frame
+	unsigned int sz;
+	unsigned short* buf;
+	depthframe->AccessUnderlyingBuffer(&sz, &buf);
+
+	// Write vertex coordinates
+	mapper->MapColorFrameToDepthSpace(sz, buf, CWIDTH*CHEIGHT, colorDataInDepthSpace);
+	float* fdest = (float*)dest;
+	int k, j;
+	float d;
+	for (int i = 0; i < CWIDTH*CHEIGHT; i++) {
+		k = colorDataInDepthSpace[i].X;
+		j = colorDataInDepthSpace[i].Y;
+		if (k > 0 && j > 0) {
+			d = buf[j * DWIDTH + k];
+			fdest[i] = d ;
+		}
+		else {
+			fdest[i] = 0;
 		}
 	}
-	if (frame) frame->Release();
-}
 
-void GameManager::getRgbData(GLubyte* dest) {
-	IColorFrame* frame = NULL;
-	if (SUCCEEDED(colorReader->AcquireLatestFrame(&frame))) {
-		frame->CopyConvertedFrameDataToArray(CWIDTH*CHEIGHT * 4, colorData, ColorImageFormat_Bgra);
+	if (depthframe) depthframe->Release();
+
+}
+void GameManager::getColorData(IMultiSourceFrame* frame, GLubyte* dest) {
+	IColorFrame* colorframe;
+	IColorFrameReference* frameref = NULL;
+	frame->get_ColorFrameReference(&frameref);
+	frameref->AcquireFrame(&colorframe);
+	if (frameref) frameref->Release();
+
+	if (!colorframe) return;
+
+	// Get data from frame
+	colorframe->CopyConvertedFrameDataToArray(CWIDTH*CHEIGHT * 4, colorData, ColorImageFormat_Bgra);
+
+	if (colorframe) colorframe->Release();
+}
+void GameManager::getKinectData() {
+	IMultiSourceFrame* frame = NULL;
+	if (SUCCEEDED(reader->AcquireLatestFrame(&frame))) {		
+		getColorData(frame, colorData);
+		getDepthData(frame, depthData);
 	}
 	if (frame) frame->Release();
-
 }
-
-
 
 
 
 void GameManager::idle() {
-	// do nothing
 }
 void GameManager::keydown(int key) {
 	// key = pressed key

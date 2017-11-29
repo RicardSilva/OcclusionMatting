@@ -8,7 +8,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-#define CAPTION "MicroMachines"
+#define CAPTION "OcclusionMatting"
 int WindowHandle = 0;
 int WinX = 1200, WinY = 900;
 
@@ -51,7 +51,10 @@ void display(void) {
 	gm->display();
 	
 }
+void update(void) {
+	gm->update(0);
 
+}
 
 
 
@@ -76,7 +79,7 @@ int main(int argc, char **argv) {
 	//  Callback Registration
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
-	//glutIdleFunc(renderScene);
+	glutIdleFunc(update);
 
 	glutTimerFunc(0, FPScounter, 0);
 	glutTimerFunc(0, refreshTimer, 0);
@@ -100,7 +103,7 @@ int main(int argc, char **argv) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
-	glClearColor(0.53, 0.81, 0.92, 1);
+	glClearColor(0.53, 0.81, 0.92, 0);
 	gm = new GameManager();
 	gm->init();
 	

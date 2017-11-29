@@ -57,15 +57,16 @@ class GameManager {
 	GLuint realColorTexture;
 	GLuint realDepthTexture;
 
-	GLubyte colorData[CWIDTH*CHEIGHT * 4];		// BGRA array that contains the texture data
-	GLubyte depthData[DWIDTH*DHEIGHT];			// Depth values stored in this array
-	GLubyte colortodepth[DWIDTH*DHEIGHT * 4];	// BGRA array that contains the mapped color data
+	// Intermediate Buffers
+	GLubyte colorData[CWIDTH*CHEIGHT * 4];    // Stores RGB color image
+	float depthData[CWIDTH*CHEIGHT];		  // Stores RGB depth image
+	DepthSpacePoint colorDataInDepthSpace[CWIDTH*CHEIGHT];             // Maps depth rgb pixels to depth pixels
 
-	
-	// Kinect variables
-	IKinectSensor* sensor;				// Kinect sensor
-	IColorFrameReader* colorReader;     // Kinect color data source
-	IDepthFrameReader* depthReader;		// Kinect depth data source
+														 // Kinect Variables
+	IKinectSensor* sensor;             // Kinect sensor
+	IMultiSourceFrameReader* reader;   // Kinect data source
+	ICoordinateMapper* mapper;         // Converts between depth, color, and 3d coordinates
+
 
 
 public:
@@ -73,6 +74,7 @@ public:
 
 	~GameManager() {
 		delete(shader);
+		delete(alphaShader);
 		delete(activeCamera);
 		delete(directionalLight);
 	}
@@ -92,8 +94,9 @@ public:
 	void idle();
 	void keydown(int key);
 
-	void getDepthData(GLubyte* dest);
-	void getRgbData(GLubyte* dest);
+	void getKinectData();
+	void getDepthData(IMultiSourceFrame* frame, float* dest);
+	void getColorData(IMultiSourceFrame* frame, GLubyte* dest);
 
 	
 
