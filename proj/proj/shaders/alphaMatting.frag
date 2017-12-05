@@ -12,35 +12,58 @@ uniform sampler2D realColor;
 uniform sampler2D realDepth;
 
 const float zNear = 0.1;
-const float zFar = 30.0;
+const float zFar = 8000.0;
 
+   // float z_n = 2.0 * z_b - 1.0;
+   // float depthV = 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear)) * 50;
 
 
 void main() {
 
 	
 	
-	float z_b = texture(virtualDepth, texC).r;
-    float z_n = 2.0 * z_b - 1.0;
-    float depthV = 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear)) * 100;	 
+	float z_b = texture(virtualDepth, texC).r;	 
+	float depthV = (2.0 * zNear) / (zFar + zNear - z_b * (zFar - zNear));
 	vec4 colorV = texture(virtualColor, texC);
 	
 	vec2 v_texcoord = vec2(texC.s, 1.0 - texC.t);
-	vec4 depthR = texture(realDepth, v_texcoord);	
+	float depthR = texture(realDepth, v_texcoord).r;	
 	vec4 colorR = texture(realColor, v_texcoord);
-	
-	if(depthV < depthR.r || depthV == depthR.r)
+
+	if(depthR == 1 && depthV < 0.9)
 		colorOut = colorV;
-	else
+	
+	else if(depthR < depthV || depthV > 0.9 )
 		colorOut = colorR;
+	else
+		colorOut = colorV;
 	
 	//colorOut = vec4(depthV, depthV, depthV, 1.0);
-	//colorOut = vec4(depthR.r, depthR.r, depthR.r, 1.0);
+	//colorOut = colorV;
+	colorOut = vec4(depthR, depthR, depthR, 1.0);
+	//colorOut = mix(colorOut, vec4(depthR, depthR, depthR, 1.0), 0.5);
 	//colorOut = colorR;
-	//colorOut = mix(depthR.r, colorR, 0.5);
-	//if ( depthR.r == 0 )
+	//colorOut = mix(vec4(depthR, depthR, depthR, 1.0), colorR, 0.5);
+	//if ( z_b < 1 )
 	//	colorOut = vec4(1.0,0.0,0.0,1.0);
 	//else
 	//	colorOut = vec4(0.0,1.0,0.0,1.0);
+	
+	//colorOut = vec4(z_b, z_b, z_b, 1.0);
+	
+	
+	//if(texC.s < 0.5)
+	//	colorOut = vec4(depthR, depthR, depthR, 1.0);
+	//else
+	//	colorOut = vec4(depthV, depthV, depthV, 1.0);
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 }

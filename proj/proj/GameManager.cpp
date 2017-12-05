@@ -55,6 +55,7 @@ bool GameManager::initKinect() {
 		sensor->OpenMultiSourceFrameReader(
 			FrameSourceTypes::FrameSourceTypes_Depth | FrameSourceTypes::FrameSourceTypes_Color,
 			&reader);
+		
 		return reader;
 	}
 	else {
@@ -97,7 +98,7 @@ void GameManager::initCameras() {
 
 	loadIdentity(VIEW);
 
-	Camera* sideCamera = new PerspectiveCamera(70, (float)WIDTH / HEIGHT, 0.1f, 30.0f);
+	Camera* sideCamera = new PerspectiveCamera(70, (float)WIDTH / HEIGHT, 0.1f, 8000.0f);
 	sideCamera->setEye(vec3(0,0,10));
 	sideCamera->setTarget(vec3(0,0,0));
 	sideCamera->setUp(vec3(0,1,0));
@@ -111,7 +112,7 @@ void GameManager::initGameObjects() {
 
 	shader = ShaderManager::instance()->getShader("lightShader");
 	model = ModelManager::instance()->getModel("cube");
-	cube = new GameObject(vec3(0,0,0), shader, model);
+	cube = new GameObject(vec3(0,0,-500), shader, model);
 
 	shader = ShaderManager::instance()->getShader("alphaShader");
 	model = ModelManager::instance()->getModel("plane");
@@ -188,17 +189,23 @@ void GameManager::getDepthData(IMultiSourceFrame* frame, float* dest) {
 	for (int i = 0; i < CWIDTH*CHEIGHT; i++) {
 		k = colorDataInDepthSpace[i].X;
 		j = colorDataInDepthSpace[i].Y;
-		if (k > 0 && j > 0) {
+		if (k > 0 && j > 0 ) {
 			d = buf[j * DWIDTH + k];
-			fdest[i] = d ;
+			if(d == 0)
+				fdest[i] = 1;
+			else 
+				fdest[i] = d / 8000.0f;	
+			
 		}
 		else {
-			fdest[i] = 0;
+				
+			fdest[i] = 1;
 		}
 	}
 
 	if (depthframe) depthframe->Release();
 
+	
 }
 void GameManager::getColorData(IMultiSourceFrame* frame, GLubyte* dest) {
 	IColorFrame* colorframe;
