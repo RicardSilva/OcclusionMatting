@@ -112,7 +112,7 @@ void GameManager::initGameObjects() {
 
 	shader = ShaderManager::instance()->getShader("lightShader");
 	model = ModelManager::instance()->getModel("cube");
-	cube = new GameObject(vec3(0,0,-500), shader, model);
+	cube = new GameObject(vec3(0,0,-650), shader, model);
 
 	shader = ShaderManager::instance()->getShader("alphaShader");
 	model = ModelManager::instance()->getModel("plane");
@@ -192,14 +192,15 @@ void GameManager::getDepthData(IMultiSourceFrame* frame, float* dest) {
 		if (k > 0 && j > 0 ) {
 			d = buf[j * DWIDTH + k];
 			if(d == 0)
-				fdest[i] = 1;
+				fdest[i] = invalidDepth;
 			else 
 				fdest[i] = d / 8000.0f;	
+			
 			
 		}
 		else {
 				
-			fdest[i] = 1;
+			fdest[i] = invalidDepth;
 		}
 	}
 

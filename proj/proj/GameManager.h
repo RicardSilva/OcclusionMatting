@@ -97,9 +97,7 @@ public:
 	void getKinectData();
 	void getDepthData(IMultiSourceFrame* frame, float* dest);
 	void getColorData(IMultiSourceFrame* frame, GLubyte* dest);
-
 	
-
 	
 	void display();
 

@@ -14,8 +14,6 @@ uniform sampler2D realDepth;
 const float zNear = 0.1;
 const float zFar = 8000.0;
 
-   // float z_n = 2.0 * z_b - 1.0;
-   // float depthV = 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear)) * 50;
 
 
 void main() {
@@ -32,7 +30,8 @@ void main() {
 
 	if(depthR == 1 && depthV < 0.9)
 		colorOut = colorV;
-	
+	else if(depthR == -1 && depthV < 0.9)
+		colorOut = colorR;
 	else if(depthR < depthV || depthV > 0.9 )
 		colorOut = colorR;
 	else
@@ -40,7 +39,7 @@ void main() {
 	
 	//colorOut = vec4(depthV, depthV, depthV, 1.0);
 	//colorOut = colorV;
-	colorOut = vec4(depthR, depthR, depthR, 1.0);
+	//colorOut = vec4(depthR, depthR, depthR, 1.0);
 	//colorOut = mix(colorOut, vec4(depthR, depthR, depthR, 1.0), 0.5);
 	//colorOut = colorR;
 	//colorOut = mix(vec4(depthR, depthR, depthR, 1.0), colorR, 0.5);
