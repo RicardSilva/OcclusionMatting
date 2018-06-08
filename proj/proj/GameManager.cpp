@@ -112,7 +112,7 @@ void GameManager::initGameObjects() {
 
 	shader = ShaderManager::instance()->getShader("lightShader");
 	model = ModelManager::instance()->getModel("cube");
-	cube = new GameObject(vec3(0,0,-650), shader, model);
+	cube = new GameObject(vec3(0,0,-600), shader, model);
 
 	shader = ShaderManager::instance()->getShader("alphaShader");
 	model = ModelManager::instance()->getModel("plane");
@@ -139,7 +139,8 @@ void GameManager::display() {
 	fbo->unbindCurrentFrameBuffer();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	loadIdentity(MODEL);	
+	loadIdentity(MODEL);
+	
 	activeCamera->computeView();
 	activeCamera->computeProjection(WIDTH, HEIGHT);
 
@@ -192,7 +193,7 @@ void GameManager::getDepthData(IMultiSourceFrame* frame, float* dest) {
 		if (k > 0 && j > 0 ) {
 			d = buf[j * DWIDTH + k];
 			if(d == 0)
-				fdest[i] = invalidDepth;
+				fdest[i] = -1.0f;
 			else 
 				fdest[i] = d / 8000.0f;	
 			
@@ -200,7 +201,7 @@ void GameManager::getDepthData(IMultiSourceFrame* frame, float* dest) {
 		}
 		else {
 				
-			fdest[i] = invalidDepth;
+			fdest[i] = -1.0f;
 		}
 	}
 
