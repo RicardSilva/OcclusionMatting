@@ -34,8 +34,8 @@
 #define CWIDTH 1920
 #define CHEIGHT 1080
 
-#define WIDTH 1200
-#define HEIGHT 900
+#define WIDTH 1920
+#define HEIGHT 1080
 #define CAPTION "OcclusionMatting"
 
 class GameManager {
@@ -46,16 +46,25 @@ class GameManager {
 	char s[32];
 
 	Shader* shader;
-	Shader* alphaShader;
+	Shader* depthSmoothingShader;
+	Shader* coarseTrimapShader;
+
+
 	Camera* activeCamera;
 	Light* directionalLight;
 	GameObject* cube, *plane;
-	FrameBuffer* fbo;
+	FrameBuffer* virtualFbo;
+	FrameBuffer* smoothDepthFbo;
+	FrameBuffer* coarseTrimapFbo;
 
 	GLuint virtualColorTexture;
 	GLuint virtualDepthTexture;
 	GLuint realColorTexture;
 	GLuint realDepthTexture;
+
+	GLuint smoothRealDepthTexture;
+	GLuint CoarseTrimapTexture;
+
 
 	// Intermediate Buffers
 	GLubyte colorData[CWIDTH*CHEIGHT * 4];    // Stores RGB color image
@@ -74,7 +83,7 @@ public:
 
 	~GameManager() {
 		delete(shader);
-		delete(alphaShader);
+		delete(depthSmoothingShader);
 		delete(activeCamera);
 		delete(directionalLight);
 	}

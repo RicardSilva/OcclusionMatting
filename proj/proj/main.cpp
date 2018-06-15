@@ -10,7 +10,7 @@
 
 #define CAPTION "OcclusionMatting"
 int WindowHandle = 0;
-int WinX = 1200, WinY = 900;
+int WinX = 1920, WinY = 1080;
 
 GameManager* gm;
 
@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutInitContextFlags(GLUT_FORWARD_COMPATIBLE | GLUT_DEBUG);
 
-	glutInitWindowPosition(100, 100);
+	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(WinX, WinY);
 	WindowHandle = glutCreateWindow(CAPTION);
 

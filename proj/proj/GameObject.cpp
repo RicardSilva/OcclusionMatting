@@ -18,11 +18,9 @@ void GameObject::draw(){
 }
 
 void GameObject::draw2() {
-	shader->use();
 	
 	for (auto mesh : model->meshes) {
 		mesh->draw();
 	}
 
-	shader->unUse();
 }

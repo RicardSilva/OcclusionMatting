@@ -4,8 +4,8 @@
 #include "GL/freeglut.h"
 class FrameBuffer {
 
-	int WIDTH = 1200;
-	int HEIGHT = 900;
+	int WIDTH;
+	int HEIGHT;
 
 	GLuint frameBuffer;
 	GLuint colorTexture;
@@ -13,10 +13,10 @@ class FrameBuffer {
 
 
 public:
-	FrameBuffer() {
+	FrameBuffer(int width, int height) : WIDTH(width), HEIGHT(height) {
 		frameBuffer = createFrameBuffer();
-		colorTexture = createTextureAttachment(WIDTH, HEIGHT);
-		depthTexture = createDepthTextureAttachment(WIDTH, HEIGHT);
+		colorTexture = createTextureAttachment(width, height);
+		depthTexture = createDepthTextureAttachment(width, height);
 		unbindCurrentFrameBuffer();
 	}
 
@@ -31,6 +31,7 @@ public:
 	}
 	void unbindCurrentFrameBuffer() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, WIDTH, HEIGHT);
 	}
 
 	int getColorTexture() {
@@ -45,6 +46,7 @@ private:
 	void bindFrameBuffer(int frameBuffer, int width, int height) {
 		glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+		glViewport(0, 0, WIDTH, HEIGHT);
 	}
 
 	int createFrameBuffer() {
@@ -65,8 +67,6 @@ private:
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
 			0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,

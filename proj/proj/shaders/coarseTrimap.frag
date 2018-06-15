@@ -25,79 +25,13 @@ const float resY = 1080.0;
 
 const float offsetX = 1.0 / resX;
 const float offsetY = 1.0 / resY;
-/*
-float alphaEstimation(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelColor) {
-	float l = length(foregroundColor - backgroundColor);
-	return((pixelColor - backgroundColor) 
-			* (foregroundColor - backgroundColor)) 
-			/ (l * l);
-}
 
-float colorCost(vec4 foregroundColor, vec4 backgroundColor,
-				vec4 pixelColor, float alpha) {
-	
-	return length(pixelColor 
-		- (alpha * foregroundColor 
-			+ (1-alpha) * backgroundColor));
-}
-
-float propagationCost(vec4 foregroundColor, vec4 backgroundColor) {
-	return (d(foregroundColor) + d(backgroundColor)) / 2.0f * dm;
-}
-
-float objectiveFunction(float n) {
-	//find min of sum of color cost with propagation cost around the pixel
-	float weight = 0.5f;
-	return weight * colorCost(foregroundColor, backgroundColor, pixelColor) 
-		+ propagationCost(foregroundColor, backgroundColor);
-	
-	
-}
-
-
-float computeAlpha() {
-	//find best sample pair among neighbors using objectiveFunction
-	
-	//estimate alpha value
-	return alphaEstimation(foregroundColor, backgroundColor, pixelColor);
-	
-}
-*/
-
-float lowPassFilter3x3(vec2 coords) {
-	float result = 0.0;
-	float counter = 0.0;
-	float samples [9] = float[9](
-	texture(realDepth, coords + vec2(-offsetX,offsetY)).r,
-	texture(realDepth, coords + vec2(-offsetX,0)).r,
-	texture(realDepth, coords + vec2(-offsetX,-offsetY)).r,
-	texture(realDepth, coords + vec2(0,offsetY)).r,
-	texture(realDepth, coords + vec2(0,0)).r,
-	texture(realDepth, coords + vec2(0,-offsetY)).r,
-	texture(realDepth, coords + vec2(offsetX,offsetY)).r,
-	texture(realDepth, coords + vec2(offsetX,0)).r,
-	texture(realDepth, coords + vec2(offsetX,-offsetY)).r);
-	
-	for(int i = 0; i < 9; i++) {
-		
-		if(samples[i] != -1) {
-			result += samples[i];
-			counter += 1;
-		}
-	}	
-
-
-	
-	return result / counter;
-	
-}
 
 
 int evaluateLayer(vec2 coords) {
 	//Sample real depth
-	vec2 v_texcoord = vec2(coords.s, 1.0 - coords.t);
 	//float depthReal = texture(realDepth, v_texcoord).r;	
-	float depthReal = texture(realDepth, v_texcoord).r;	
+	float depthReal = texture(realSmoothDepth, coords).r;	
 	
 	
 	//Sample virtual depth	 
@@ -115,7 +49,6 @@ int evaluateLayer(vec2 coords) {
 			//return vec4(0,0,0,1); 
 			return FOREGROUND;
 		}
-		depthReal = lowPassFilter3x3(v_texcoord);
 		if (depthVirtual < depthReal) { //VIRTUAL IN FOREGROUND
 			//return vec4(0,0,0,1); 
 			return FOREGROUND;
@@ -194,28 +127,15 @@ vec4 generateTrimap(vec2 coords) {
 
 
 void main() {
-		
-	
-	
-	//Sample real color and depth
-	vec2 v_texcoord = vec2(texC.s, 1.0 - texC.t);
-	float depthReal = texture(realDepth, v_texcoord).r;	
-	vec4 colorReal = texture(realColor, v_texcoord);	
-	
-	//Sample virtual color and depth
-	//float depthVirtual = texture(virtualDepth, texC).r;	 
-	float z_b = texture(virtualDepth, texC).r;	 
-	float depthVirtual = (2.0 * zNear) / (zFar + zNear - z_b * (zFar - zNear));
-	vec4 colorVirtual = texture(virtualColor, texC);
+			
 	
 	colorOut = vec4(0,0,0,1);
-	//====TRIMAP GENERATION====
 	//### Coarse segmentation ###
 	colorOut = generateTrimap(texC);
-	//colorOut += colorReal * 0.1;
-	//colorOut += colorVirtual * 0.1;
-	//depthReal = lowPassFilter3x3(v_texcoord);
-	//colorOut = vec4(depthReal, 0, 0,1);
+	
+	
+	colorOut = texture(virtualDepth, texC);
+	//colorOut = vec4(1,0,0,1);
 	
 	//### Labeling of unknown regions ###
 	

@@ -11,9 +11,15 @@ void GameManager::onRefreshTimer(int value) {
 void GameManager::init() {
 
 	srand(time(NULL));	// initialize seed of random
-	fbo = new FrameBuffer();
-	virtualColorTexture = fbo->getColorTexture();
-	virtualDepthTexture = fbo->getDepthTexture();
+
+	virtualFbo = new FrameBuffer(WIDTH, HEIGHT);
+	virtualColorTexture = virtualFbo->getColorTexture();
+	virtualDepthTexture = virtualFbo->getDepthTexture();
+
+	smoothDepthFbo = new FrameBuffer(WIDTH, HEIGHT);
+	smoothRealDepthTexture = smoothDepthFbo->getColorTexture();
+
+
 	initShaders();
 	initLights();
 	initMeshes();
@@ -66,11 +72,18 @@ void GameManager::initShaders() {
 	shader = new LightShader("shaders/pointlight.vert", "shaders/pointlight.frag");
 	ShaderManager::instance()->addShader("lightShader", shader);
 
-	alphaShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/alphaMatting.frag");
-	alphaShader->use();
-	alphaShader->bindTextureUnits();
-	alphaShader->unUse();
-	ShaderManager::instance()->addShader("alphaShader", alphaShader);
+	depthSmoothingShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/depthSmoothing.frag");
+	depthSmoothingShader->use();
+	depthSmoothingShader->bindTextureUnits();
+	depthSmoothingShader->unUse();
+
+	coarseTrimapShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/coarseTrimap.frag");
+	coarseTrimapShader->use();
+	coarseTrimapShader->bindTextureUnits();
+	coarseTrimapShader->unUse();
+
+
+	ShaderManager::instance()->addShader("alphaShader", depthSmoothingShader);
 }
 void GameManager::initLights() {
 	directionalLight = new DirectionalLight(vec4(0, 0, -1, 0), vec3(1, 1, 1), 0.5f);
@@ -134,9 +147,16 @@ void GameManager::update(double timeStep) {
 }
 void GameManager::display() {	
 	FrameCount++;
-	fbo->bindFrameBuffer();
+
+	virtualFbo->bindFrameBuffer();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	fbo->unbindCurrentFrameBuffer();
+	virtualFbo->unbindCurrentFrameBuffer();
+
+	smoothDepthFbo->bindFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	smoothDepthFbo->unbindCurrentFrameBuffer();
+
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	loadIdentity(MODEL);
@@ -146,9 +166,9 @@ void GameManager::display() {
 
 	directionalLight->draw();
 	// Render objects
-	fbo->bindFrameBuffer();
+	virtualFbo->bindFrameBuffer();
 	cube->draw();
-	fbo->unbindCurrentFrameBuffer();
+	virtualFbo->unbindCurrentFrameBuffer();
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, virtualColorTexture);
@@ -158,9 +178,19 @@ void GameManager::display() {
 	glBindTexture(GL_TEXTURE_2D, realColorTexture);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, realDepthTexture);
-	
-	
-	plane->draw();
+	glActiveTexture(GL_TEXTURE4);
+
+	//smoothDepthFbo->bindFrameBuffer();
+	//depthSmoothingShader->use();
+	//plane->draw2();
+	//depthSmoothingShader->unUse();
+    //smoothDepthFbo->unbindCurrentFrameBuffer();
+
+
+	glBindTexture(GL_TEXTURE_2D, smoothRealDepthTexture);
+    coarseTrimapShader->use();
+	plane->draw2();
+	coarseTrimapShader->unUse();
 
 
 	glutSwapBuffers();
@@ -247,15 +277,15 @@ void GameManager::keydown(int key) {
 
 }
 void GameManager::reshape(GLsizei w, GLsizei h) {
-	// When viewport is resized, objects scale with it
-	float ratio = (float)WIDTH / HEIGHT;
-	float aspect = (float)w / h;
+	//// When viewport is resized, objects scale with it
+	//float ratio = (float)WIDTH / HEIGHT;
+	//float aspect = (float)w / h;
 
-	// adapt viewport
-	if (ratio < aspect)
-		glViewport((w - h*ratio) / 2.0f, 0, h*ratio, h);
-	else
-		glViewport(0, (h - w / ratio) / 2, w, w / ratio);
+	//// adapt viewport
+	//if (ratio < aspect)
+	//	glViewport((w - h*ratio) / 2.0f, 0, h*ratio, h);
+	//else
+	//	glViewport(0, (h - w / ratio) / 2, w, w / ratio);
 }
 
 bool isOpenGLError() {
