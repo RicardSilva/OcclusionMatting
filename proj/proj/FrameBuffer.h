@@ -44,7 +44,7 @@ public:
 private:	
 
 	void bindFrameBuffer(int frameBuffer, int width, int height) {
-		glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
+		//glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 		glViewport(0, 0, WIDTH, HEIGHT);
 	}

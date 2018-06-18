@@ -22,19 +22,18 @@ const float offsetX = 1.0 / resX;
 const float offsetY = 1.0 / resY;
 
 
-float lowPassFilter3x3(vec2 coords) {
-	
-	if(texture(realDepth, coords).r == -1) {
-		return -1;
+vec4 lowPassFilter3x3(vec2 coords) {
+	float thisDepth = texture(realDepth, coords).r;
+	if(thisDepth == -1.0) {
+		return vec4(0,1,0,1);
 	}
 	float result = 0.0;
-	float counter = 0.0;
 	float samples [9] = float[9](
 	texture(realDepth, coords + vec2(-offsetX,offsetY)).r,
 	texture(realDepth, coords + vec2(-offsetX,0)).r,
 	texture(realDepth, coords + vec2(-offsetX,-offsetY)).r,
 	texture(realDepth, coords + vec2(0,offsetY)).r,
-	texture(realDepth, coords + vec2(0,0)).r,
+	thisDepth,
 	texture(realDepth, coords + vec2(0,-offsetY)).r,
 	texture(realDepth, coords + vec2(offsetX,offsetY)).r,
 	texture(realDepth, coords + vec2(offsetX,0)).r,
@@ -42,14 +41,17 @@ float lowPassFilter3x3(vec2 coords) {
 	
 	for(int i = 0; i < 9; i++) {
 		
-		if(samples[i] != -1) {
+		if(samples[i] == -1) {
+			result += thisDepth / 9.0;
+		}
+		else {
 			result += samples[i] / 9.0;
 		}
 	}	
 
 
 	
-	return result;
+	return vec4(result, 0,0,1);
 	
 }
 
@@ -71,9 +73,8 @@ void main() {
 	
 	
 	vec2 v_texcoord = vec2(texC.s, 1.0 - texC.t);
-	float depth = lowPassFilter3x3(v_texcoord);
+	colorOut = lowPassFilter3x3(v_texcoord);
 	
-	colorOut = vec4(depth, depth, depth, 1);
 	
 	
 }

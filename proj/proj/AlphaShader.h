@@ -25,6 +25,9 @@ private:
 	GLint realColorID;
 	GLint realDepthID;
 	GLint realSmoothDepthID;
+	GLint coarseTrimapID;
+	GLint trimapEdgeID;
+	GLint realColorEdgeID;
 
 
 
@@ -48,6 +51,9 @@ public:
 		realColorID = getUniformLocation("realColor");
 		realDepthID = getUniformLocation("realDepth");
 		realSmoothDepthID = getUniformLocation("realSmoothDepth");
+		coarseTrimapID = getUniformLocation("coarseTrimap");
+		trimapEdgeID = getUniformLocation("trimapEdge");
+		realColorEdgeID = getUniformLocation("realColorEdge");
 	}
 	void bindTextureUnits() {
 		Shader::loadInt(virtualColorID, 0);
@@ -55,6 +61,9 @@ public:
 		Shader::loadInt(realColorID, 2);
 		Shader::loadInt(realDepthID, 3);
 		Shader::loadInt(realSmoothDepthID, 4);
+		Shader::loadInt(coarseTrimapID, 5);
+		Shader::loadInt(trimapEdgeID, 6);
+		Shader::loadInt(realColorEdgeID, 7);
 	}
 
 	void loadVirtualColor(GLint id) {

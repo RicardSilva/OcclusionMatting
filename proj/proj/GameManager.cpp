@@ -19,6 +19,14 @@ void GameManager::init() {
 	smoothDepthFbo = new FrameBuffer(WIDTH, HEIGHT);
 	smoothRealDepthTexture = smoothDepthFbo->getColorTexture();
 
+	coarseTrimapFbo = new FrameBuffer(WIDTH, HEIGHT);
+	coarseTrimapTexture = coarseTrimapFbo->getColorTexture();
+
+	trimapEdgeFbo = new FrameBuffer(WIDTH, HEIGHT);
+	trimapEdgeTexture = trimapEdgeFbo->getColorTexture();
+
+	realColorEdgeFbo = new FrameBuffer(WIDTH, HEIGHT);
+	realColorEdgeTexture = realColorEdgeFbo->getColorTexture();
 
 	initShaders();
 	initLights();
@@ -82,6 +90,20 @@ void GameManager::initShaders() {
 	coarseTrimapShader->bindTextureUnits();
 	coarseTrimapShader->unUse();
 
+	edgeDetectionShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/edgeDetection.frag");
+	edgeDetectionShader->use();
+	edgeDetectionShader->bindTextureUnits();
+	edgeDetectionShader->unUse();
+
+	colorEdgeDetectionShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/colorEdgeDetection.frag");
+	colorEdgeDetectionShader->use();
+	colorEdgeDetectionShader->bindTextureUnits();
+	colorEdgeDetectionShader->unUse();
+	
+	edgeLabelingShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/edgeLabeling.frag");
+	edgeLabelingShader->use();
+	edgeLabelingShader->bindTextureUnits();
+	edgeLabelingShader->unUse();
 
 	ShaderManager::instance()->addShader("alphaShader", depthSmoothingShader);
 }
@@ -156,6 +178,18 @@ void GameManager::display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	smoothDepthFbo->unbindCurrentFrameBuffer();
 
+	coarseTrimapFbo->bindFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	coarseTrimapFbo->unbindCurrentFrameBuffer();
+
+	trimapEdgeFbo->bindFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	trimapEdgeFbo->unbindCurrentFrameBuffer();
+
+	realColorEdgeFbo->bindFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	realColorEdgeFbo->unbindCurrentFrameBuffer();
+
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -178,20 +212,47 @@ void GameManager::display() {
 	glBindTexture(GL_TEXTURE_2D, realColorTexture);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, realDepthTexture);
+	
+
+	smoothDepthFbo->bindFrameBuffer();
+	depthSmoothingShader->use();
+	plane->draw2();
+	depthSmoothingShader->unUse();
+    smoothDepthFbo->unbindCurrentFrameBuffer();
+
 	glActiveTexture(GL_TEXTURE4);
-
-	//smoothDepthFbo->bindFrameBuffer();
-	//depthSmoothingShader->use();
-	//plane->draw2();
-	//depthSmoothingShader->unUse();
-    //smoothDepthFbo->unbindCurrentFrameBuffer();
-
-
 	glBindTexture(GL_TEXTURE_2D, smoothRealDepthTexture);
+
+	coarseTrimapFbo->bindFrameBuffer();
     coarseTrimapShader->use();
 	plane->draw2();
 	coarseTrimapShader->unUse();
+	coarseTrimapFbo->unbindCurrentFrameBuffer();
 
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, coarseTrimapTexture);
+
+	trimapEdgeFbo->bindFrameBuffer();
+	edgeDetectionShader->use();
+	plane->draw2();
+	edgeDetectionShader->unUse();
+	trimapEdgeFbo->unbindCurrentFrameBuffer();
+
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, trimapEdgeTexture);
+
+	realColorEdgeFbo->bindFrameBuffer();
+	colorEdgeDetectionShader->use();
+	plane->draw2();
+	colorEdgeDetectionShader->unUse();
+	realColorEdgeFbo->unbindCurrentFrameBuffer();
+
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, realColorEdgeTexture);
+
+	edgeLabelingShader->use();
+	plane->draw2();
+	edgeLabelingShader->unUse();
 
 	glutSwapBuffers();
 	

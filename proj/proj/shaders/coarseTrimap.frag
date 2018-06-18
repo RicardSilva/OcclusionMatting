@@ -15,10 +15,6 @@ uniform sampler2D realSmoothDepth;
 const float zNear = 0.1;
 const float zFar = 8000.0;
 
-const int INVALID = -1;
-const int UKNOWN = 2;
-const int BACKGROUND = 1;
-const int FOREGROUND = 0;
 
 const float resX = 1920.0;
 const float resY = 1080.0;
@@ -28,11 +24,10 @@ const float offsetY = 1.0 / resY;
 
 
 
-int evaluateLayer(vec2 coords) {
-	//Sample real depth
-	//float depthReal = texture(realDepth, v_texcoord).r;	
+vec4 generateTrimap(vec2 coords) {
+	//Sample smoothed real depth
 	float depthReal = texture(realSmoothDepth, coords).r;	
-	
+	float invalidDepthReal = texture(realSmoothDepth, coords).g;
 	
 	//Sample virtual depth	 
 	float z_b = texture(virtualDepth, coords).r;	 
@@ -40,23 +35,19 @@ int evaluateLayer(vec2 coords) {
 	
 	
 	if(depthVirtual > 0.2) { //INVALID
-		//return vec4(1,0,0,1);
-		return INVALID;
+		return vec4(1,0,0,1);
 	}
 	else {
 		
-		if (depthReal == -1) { //VIRTUAL IN FOREGROUND
-			//return vec4(0,0,0,1); 
-			return FOREGROUND;
+		if (invalidDepthReal == 1) { //VIRTUAL IN FOREGROUND
+			return vec4(0,0,0,1); 
 		}
-		if (depthVirtual < depthReal) { //VIRTUAL IN FOREGROUND
-			//return vec4(0,0,0,1); 
-			return FOREGROUND;
+		else if (depthVirtual <= depthReal) { //VIRTUAL IN FOREGROUND
+			return vec4(0,0,0,1); 
 		}
 		
 		else if (depthVirtual > depthReal) { //VIRTUAL IN BACKGROUND
-			//return vec4(1,1,1,1) ; 
-			return BACKGROUND;
+			return vec4(1,1,1,1); 
 		}
 		
 		
@@ -64,7 +55,7 @@ int evaluateLayer(vec2 coords) {
 	}
 }
 
-float sobel3x3(vec2 coords) {
+/*float sobel3x3(vec2 coords) {
 	int gradX = 0;
 	int gradY = 0;
 	int samples [9] = int[9](
@@ -105,25 +96,7 @@ float sobel3x3(vec2 coords) {
 	return sqrt(gradX * gradX + gradY * gradY);
 	
 }
-vec4 generateTrimap(vec2 coords) {
-	
-	int layer = evaluateLayer(coords);
-	if(layer == INVALID) //INVALID = RED
-		return vec4(1,0,0,1);
-	
-	float sobelGradient = sobel3x3(coords);
-	if(sobelGradient > 0.5) //UKNOWN = GRAY
-		//return vec4(0.5,0.5,0.5,1);
-		return vec4(0,1,0,1);
-	
-	else if(layer == FOREGROUND) //FOREGROUND = BLACK
-		return vec4(0,0,0,1);
-	
-	else if(layer == BACKGROUND) //BACKGROUND = WHITE
-		return vec4(1,1,1,1);
-	
-}
-
+*/
 
 
 void main() {
@@ -131,27 +104,7 @@ void main() {
 	
 	colorOut = vec4(0,0,0,1);
 	//### Coarse segmentation ###
-	colorOut = generateTrimap(texC);
-	
-	
-	colorOut = texture(virtualDepth, texC);
-	//colorOut = vec4(1,0,0,1);
-	
-	//### Labeling of unknown regions ###
-	
-	//### Adaptive dilation ###
-	
-	//====FOREGROUND AND BACKGROUND PROPAGATION====
-	//vec4 backgroundColor = vec4();
-	//vec4 foregroundColor = vec4();
-	
-	//====ALPHA ESTIMATION====
-	
-	//float alpha = computeAlpha();
-	//colorOut = alpha * colorVirtual + (1.0f - alpha) * colorReal;
-	
-	
-	
+	colorOut = generateTrimap(texC);	
 }
 
 
