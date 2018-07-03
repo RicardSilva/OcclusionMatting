@@ -51,16 +51,22 @@ class GameManager {
 	Shader* edgeDetectionShader;
 	Shader* colorEdgeDetectionShader;
 	Shader* edgeLabelingShader;
+	Shader* unknownDilationShader;
 
 
 	Camera* activeCamera;
 	Light* directionalLight;
 	GameObject* cube, *plane;
+
+	std::vector<FrameBuffer*> frameBuffers;
+
 	FrameBuffer* virtualFbo;
 	FrameBuffer* smoothDepthFbo;
 	FrameBuffer* coarseTrimapFbo;
 	FrameBuffer* trimapEdgeFbo;
 	FrameBuffer* realColorEdgeFbo;
+	FrameBuffer* unknownLabelsFbo;
+	FrameBuffer* finalTrimapFbo;
 
 	GLuint virtualColorTexture;
 	GLuint virtualDepthTexture;
@@ -71,6 +77,8 @@ class GameManager {
 	GLuint coarseTrimapTexture;
 	GLuint trimapEdgeTexture;
 	GLuint realColorEdgeTexture;
+	GLuint unknownLabelsTexture;
+	GLuint finalTrimapTexture;
 	
 
 
@@ -101,6 +109,7 @@ public:
 
 	void init();
 	bool initKinect();
+	void initFrameBuffers();
 	void initShaders();
 	void initLights();
 	void initMeshes();

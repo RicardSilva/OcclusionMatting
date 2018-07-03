@@ -12,22 +12,8 @@ void GameManager::init() {
 
 	srand(time(NULL));	// initialize seed of random
 
-	virtualFbo = new FrameBuffer(WIDTH, HEIGHT);
-	virtualColorTexture = virtualFbo->getColorTexture();
-	virtualDepthTexture = virtualFbo->getDepthTexture();
-
-	smoothDepthFbo = new FrameBuffer(WIDTH, HEIGHT);
-	smoothRealDepthTexture = smoothDepthFbo->getColorTexture();
-
-	coarseTrimapFbo = new FrameBuffer(WIDTH, HEIGHT);
-	coarseTrimapTexture = coarseTrimapFbo->getColorTexture();
-
-	trimapEdgeFbo = new FrameBuffer(WIDTH, HEIGHT);
-	trimapEdgeTexture = trimapEdgeFbo->getColorTexture();
-
-	realColorEdgeFbo = new FrameBuffer(WIDTH, HEIGHT);
-	realColorEdgeTexture = realColorEdgeFbo->getColorTexture();
-
+	
+	initFrameBuffers();
 	initShaders();
 	initLights();
 	initMeshes();
@@ -76,6 +62,36 @@ bool GameManager::initKinect() {
 		return false;
 	}
 }
+void GameManager::initFrameBuffers() {
+	virtualFbo = new FrameBuffer(WIDTH, HEIGHT);
+	virtualColorTexture = virtualFbo->getColorTexture();
+	virtualDepthTexture = virtualFbo->getDepthTexture();
+	frameBuffers.push_back(virtualFbo);
+
+	smoothDepthFbo = new FrameBuffer(WIDTH, HEIGHT);
+	smoothRealDepthTexture = smoothDepthFbo->getColorTexture();
+	frameBuffers.push_back(smoothDepthFbo);
+
+	coarseTrimapFbo = new FrameBuffer(WIDTH, HEIGHT);
+	coarseTrimapTexture = coarseTrimapFbo->getColorTexture();
+	frameBuffers.push_back(coarseTrimapFbo);
+
+	trimapEdgeFbo = new FrameBuffer(WIDTH, HEIGHT);
+	trimapEdgeTexture = trimapEdgeFbo->getColorTexture();
+	frameBuffers.push_back(trimapEdgeFbo);
+
+	realColorEdgeFbo = new FrameBuffer(WIDTH, HEIGHT);
+	realColorEdgeTexture = realColorEdgeFbo->getColorTexture();
+	frameBuffers.push_back(realColorEdgeFbo);
+
+	unknownLabelsFbo = new FrameBuffer(WIDTH, HEIGHT);
+	unknownLabelsTexture = unknownLabelsFbo->getColorTexture();
+	frameBuffers.push_back(unknownLabelsFbo);
+
+	finalTrimapFbo = new FrameBuffer(WIDTH, HEIGHT);
+	finalTrimapTexture = finalTrimapFbo->getColorTexture();
+	frameBuffers.push_back(finalTrimapFbo);
+}
 void GameManager::initShaders() {
 	shader = new LightShader("shaders/pointlight.vert", "shaders/pointlight.frag");
 	ShaderManager::instance()->addShader("lightShader", shader);
@@ -84,28 +100,37 @@ void GameManager::initShaders() {
 	depthSmoothingShader->use();
 	depthSmoothingShader->bindTextureUnits();
 	depthSmoothingShader->unUse();
+	ShaderManager::instance()->addShader("depthSmoothing", depthSmoothingShader);
 
 	coarseTrimapShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/coarseTrimap.frag");
 	coarseTrimapShader->use();
 	coarseTrimapShader->bindTextureUnits();
 	coarseTrimapShader->unUse();
+	ShaderManager::instance()->addShader("coarseTrimap", coarseTrimapShader);
 
 	edgeDetectionShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/edgeDetection.frag");
 	edgeDetectionShader->use();
 	edgeDetectionShader->bindTextureUnits();
 	edgeDetectionShader->unUse();
+	ShaderManager::instance()->addShader("edgeDetection", edgeDetectionShader);
 
 	colorEdgeDetectionShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/colorEdgeDetection.frag");
 	colorEdgeDetectionShader->use();
 	colorEdgeDetectionShader->bindTextureUnits();
 	colorEdgeDetectionShader->unUse();
+	ShaderManager::instance()->addShader("colorEdgeDetection", colorEdgeDetectionShader);
 	
 	edgeLabelingShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/edgeLabeling.frag");
 	edgeLabelingShader->use();
 	edgeLabelingShader->bindTextureUnits();
 	edgeLabelingShader->unUse();
+	ShaderManager::instance()->addShader("edgeLabeling", edgeLabelingShader);
 
-	ShaderManager::instance()->addShader("alphaShader", depthSmoothingShader);
+	unknownDilationShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/unknownDilation.frag");
+	unknownDilationShader->use();
+	unknownDilationShader->bindTextureUnits();
+	unknownDilationShader->unUse();
+	ShaderManager::instance()->addShader("unknownDilation", unknownDilationShader);
 }
 void GameManager::initLights() {
 	directionalLight = new DirectionalLight(vec4(0, 0, -1, 0), vec3(1, 1, 1), 0.5f);
@@ -170,7 +195,7 @@ void GameManager::update(double timeStep) {
 void GameManager::display() {	
 	FrameCount++;
 
-	virtualFbo->bindFrameBuffer();
+	/*virtualFbo->bindFrameBuffer();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	virtualFbo->unbindCurrentFrameBuffer();
 
@@ -188,7 +213,13 @@ void GameManager::display() {
 
 	realColorEdgeFbo->bindFrameBuffer();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	realColorEdgeFbo->unbindCurrentFrameBuffer();
+	realColorEdgeFbo->unbindCurrentFrameBuffer();*/
+
+	for (auto fbo : frameBuffers) {
+		fbo->bindFrameBuffer();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		fbo->unbindCurrentFrameBuffer();
+	}
 
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -250,9 +281,18 @@ void GameManager::display() {
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, realColorEdgeTexture);
 
+	unknownLabelsFbo->bindFrameBuffer();
 	edgeLabelingShader->use();
 	plane->draw2();
 	edgeLabelingShader->unUse();
+	unknownLabelsFbo->unbindCurrentFrameBuffer();
+
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, unknownLabelsTexture);
+
+	unknownDilationShader->use();
+	plane->draw2();
+	unknownDilationShader->unUse();
 
 	glutSwapBuffers();
 	

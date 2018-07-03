@@ -28,6 +28,8 @@ private:
 	GLint coarseTrimapID;
 	GLint trimapEdgeID;
 	GLint realColorEdgeID;
+	GLint unknownLabelsID;
+	GLint finalTrimapID;
 
 
 
@@ -54,6 +56,8 @@ public:
 		coarseTrimapID = getUniformLocation("coarseTrimap");
 		trimapEdgeID = getUniformLocation("trimapEdge");
 		realColorEdgeID = getUniformLocation("realColorEdge");
+		unknownLabelsID = getUniformLocation("unknownLabels");
+		finalTrimapID = getUniformLocation("finalTrimap");
 	}
 	void bindTextureUnits() {
 		Shader::loadInt(virtualColorID, 0);
@@ -64,6 +68,8 @@ public:
 		Shader::loadInt(coarseTrimapID, 5);
 		Shader::loadInt(trimapEdgeID, 6);
 		Shader::loadInt(realColorEdgeID, 7);
+		Shader::loadInt(unknownLabelsID, 8);
+		Shader::loadInt(finalTrimapID, 9);
 	}
 
 	void loadVirtualColor(GLint id) {
