@@ -23,6 +23,7 @@
 #include "GameObject.h"
 #include "Mesh.h"
 #include "FrameBuffer.h"
+#include "MultipleLevelsFrameBuffer.h"
 
 #include <Ole2.h>
 #include <Windows.h>
@@ -38,6 +39,10 @@
 #define HEIGHT 1080
 #define CAPTION "OcclusionMatting"
 
+
+#define PIRAMID_LEVELS 1
+#define DIFFUSION_STEPS 1
+
 class GameManager {
 	int oldTime = 0;
 
@@ -52,6 +57,8 @@ class GameManager {
 	Shader* colorEdgeDetectionShader;
 	Shader* edgeLabelingShader;
 	Shader* unknownDilationShader;
+	Shader* foregroundPropagationShader;
+	Shader* piramidSmoothingShader;
 
 
 	Camera* activeCamera;
@@ -67,6 +74,8 @@ class GameManager {
 	FrameBuffer* realColorEdgeFbo;
 	FrameBuffer* unknownLabelsFbo;
 	FrameBuffer* finalTrimapFbo;
+	FrameBuffer* foregroundPropagationFbo;
+
 
 	GLuint virtualColorTexture;
 	GLuint virtualDepthTexture;
@@ -79,6 +88,7 @@ class GameManager {
 	GLuint realColorEdgeTexture;
 	GLuint unknownLabelsTexture;
 	GLuint finalTrimapTexture;
+	GLuint foregroundPropagationTexture;
 	
 
 

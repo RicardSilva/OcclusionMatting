@@ -1,6 +1,25 @@
 #include "GameManager.h"
 
 
+bool isOpenGLError() {
+	bool isError = false;
+	GLenum errCode;
+	const GLubyte *errString;
+	while ((errCode = glGetError()) != GL_NO_ERROR) {
+		isError = true;
+		errString = gluErrorString(errCode);
+		std::cerr << "OpenGL ERROR [" << errString << "]." << std::endl;
+	}
+	return isError;
+}
+void checkOpenGLError(std::string error)
+{
+	if (isOpenGLError()) {
+		std::cerr << error << std::endl;
+		getchar();
+		exit(EXIT_FAILURE);
+	}
+}
 
 void GameManager::onRefreshTimer(int value) {	
 
@@ -91,6 +110,11 @@ void GameManager::initFrameBuffers() {
 	finalTrimapFbo = new FrameBuffer(WIDTH, HEIGHT);
 	finalTrimapTexture = finalTrimapFbo->getColorTexture();
 	frameBuffers.push_back(finalTrimapFbo);
+
+	foregroundPropagationFbo = new MultipleLevelsFrameBuffer(1024, 1024, 5);
+	foregroundPropagationTexture = foregroundPropagationFbo->getColorTexture();
+	frameBuffers.push_back(foregroundPropagationFbo);
+
 }
 void GameManager::initShaders() {
 	shader = new LightShader("shaders/pointlight.vert", "shaders/pointlight.frag");
@@ -131,6 +155,18 @@ void GameManager::initShaders() {
 	unknownDilationShader->bindTextureUnits();
 	unknownDilationShader->unUse();
 	ShaderManager::instance()->addShader("unknownDilation", unknownDilationShader);
+
+	foregroundPropagationShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/foregroundPropagation.frag");
+	foregroundPropagationShader->use();
+	foregroundPropagationShader->bindTextureUnits();
+	foregroundPropagationShader->unUse();
+	ShaderManager::instance()->addShader("foregroundPropagation", foregroundPropagationShader);
+
+	piramidSmoothingShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/piramidSmoothing.frag");
+	piramidSmoothingShader->use();
+	piramidSmoothingShader->bindTextureUnits();
+	piramidSmoothingShader->unUse();
+	ShaderManager::instance()->addShader("piramidSmoothing", piramidSmoothingShader);
 }
 void GameManager::initLights() {
 	directionalLight = new DirectionalLight(vec4(0, 0, -1, 0), vec3(1, 1, 1), 0.5f);
@@ -172,7 +208,7 @@ void GameManager::initGameObjects() {
 
 	shader = ShaderManager::instance()->getShader("lightShader");
 	model = ModelManager::instance()->getModel("cube");
-	cube = new GameObject(vec3(0,0,-600), shader, model);
+	cube = new GameObject(vec3(0,0,-730), shader, model);
 
 	shader = ShaderManager::instance()->getShader("alphaShader");
 	model = ModelManager::instance()->getModel("plane");
@@ -194,27 +230,7 @@ void GameManager::update(double timeStep) {
 }
 void GameManager::display() {	
 	FrameCount++;
-
-	/*virtualFbo->bindFrameBuffer();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	virtualFbo->unbindCurrentFrameBuffer();
-
-	smoothDepthFbo->bindFrameBuffer();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	smoothDepthFbo->unbindCurrentFrameBuffer();
-
-	coarseTrimapFbo->bindFrameBuffer();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	coarseTrimapFbo->unbindCurrentFrameBuffer();
-
-	trimapEdgeFbo->bindFrameBuffer();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	trimapEdgeFbo->unbindCurrentFrameBuffer();
-
-	realColorEdgeFbo->bindFrameBuffer();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	realColorEdgeFbo->unbindCurrentFrameBuffer();*/
-
+	
 	for (auto fbo : frameBuffers) {
 		fbo->bindFrameBuffer();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -290,9 +306,48 @@ void GameManager::display() {
 	glActiveTexture(GL_TEXTURE8);
 	glBindTexture(GL_TEXTURE_2D, unknownLabelsTexture);
 
+	finalTrimapFbo->bindFrameBuffer();
 	unknownDilationShader->use();
 	plane->draw2();
 	unknownDilationShader->unUse();
+	finalTrimapFbo->unbindCurrentFrameBuffer();
+
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D, finalTrimapTexture);
+
+	//FOREGROUND PROPAGATION
+	for (int step = 0; step < DIFFUSION_STEPS; step++) {
+
+		//copy foreground into image E
+		//apply propagation shader to image E
+		foregroundPropagationFbo->bindFrameBuffer();
+		foregroundPropagationShader->use();
+		plane->draw2();
+		foregroundPropagationShader->unUse();
+		foregroundPropagationFbo->unbindCurrentFrameBuffer();
+		
+
+		//generate mipmap levels for image 
+		glActiveTexture(GL_TEXTURE10);
+		glBindTexture(GL_TEXTURE_2D, foregroundPropagationTexture);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		//go over every level of the piramid and smooth color
+		for (int level = PIRAMID_LEVELS; level >= 0; level--) {
+			piramidSmoothingShader->use();
+			plane->draw2();
+			piramidSmoothingShader->unUse();		
+		}
+	
+
+		//output final smooth color value to final foreground Color
+	
+	}
+
+	
+
+
+;
 
 	glutSwapBuffers();
 	
@@ -387,24 +442,4 @@ void GameManager::reshape(GLsizei w, GLsizei h) {
 	//	glViewport((w - h*ratio) / 2.0f, 0, h*ratio, h);
 	//else
 	//	glViewport(0, (h - w / ratio) / 2, w, w / ratio);
-}
-
-bool isOpenGLError() {
-	bool isError = false;
-	GLenum errCode;
-	const GLubyte *errString;
-	while ((errCode = glGetError()) != GL_NO_ERROR) {
-		isError = true;
-		errString = gluErrorString(errCode);
-		std::cerr << "OpenGL ERROR [" << errString << "]." << std::endl;
-	}
-	return isError;
-}
-void checkOpenGLError(std::string error)
-{
-	if (isOpenGLError()) {
-		std::cerr << error << std::endl;
-		getchar();
-		exit(EXIT_FAILURE);
-	}
 }

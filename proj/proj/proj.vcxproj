@@ -31,6 +31,7 @@
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="ModelManager.h" />
+    <ClInclude Include="MultipleLevelsFrameBuffer.h" />
     <ClInclude Include="ObjLoader.h" />
     <ClInclude Include="OrthoCamera.h" />
     <ClInclude Include="PerspectiveCamera.h" />

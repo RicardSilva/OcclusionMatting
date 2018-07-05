@@ -3,7 +3,7 @@
 #include "GL/glew.h"
 #include "GL/freeglut.h"
 class FrameBuffer {
-
+protected:
 	int WIDTH;
 	int HEIGHT;
 
@@ -20,6 +20,10 @@ public:
 		unbindCurrentFrameBuffer();
 	}
 
+	FrameBuffer(int width, int height, int a) : WIDTH(width), HEIGHT(height) {
+		
+	}
+
 	virtual ~FrameBuffer() {
 		glDeleteFramebuffers(1, &frameBuffer);
 		glDeleteTextures(1, &colorTexture);
@@ -27,7 +31,8 @@ public:
 	}
 
 	void bindFrameBuffer() {
-		bindFrameBuffer(frameBuffer, WIDTH, HEIGHT);
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+		glViewport(0, 0, WIDTH, HEIGHT);
 	}
 	void unbindCurrentFrameBuffer() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -41,13 +46,9 @@ public:
 		return depthTexture;
 	}
 
-private:	
+protected:	
 
-	void bindFrameBuffer(int frameBuffer, int width, int height) {
-		//glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-		glViewport(0, 0, WIDTH, HEIGHT);
-	}
+
 
 	int createFrameBuffer() {
 		GLuint frameBuffer;
@@ -61,17 +62,18 @@ private:
 		return frameBuffer;
 	}
 
-	int createTextureAttachment(int width, int height) {
+	virtual int createTextureAttachment(int width, int height) {
 		GLuint texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
-			0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height,
+			0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 			texture, 0);
-		glBindTexture(GL_TEXTURE_2D, texture);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 		return texture;
 	}
 	int createDepthTextureAttachment(int width, int height) {
@@ -84,6 +86,7 @@ private:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
 			texture, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 		return texture;
 	}
 

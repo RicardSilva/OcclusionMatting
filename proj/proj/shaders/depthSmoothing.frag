@@ -22,6 +22,22 @@ const float offsetX = 1.0 / resX;
 const float offsetY = 1.0 / resY;
 
 
+ 
+// A function to implement bubble sort
+void bubbleSort(float arr[9])
+{
+   int i, j;
+   for (i = 0; i < 9; i++)      
+ 
+       // Last i elements are already in place   
+       for (j = 0; j < 9-i-1; j++) 
+           if (arr[j] > arr[j+1]) {
+              float temp = arr[j];
+			  arr[j] = arr[j+1];
+			  arr[j+1] = temp;
+		   }
+}
+
 vec4 lowPassFilter3x3(vec2 coords) {
 	float thisDepth = texture(realDepth, coords).r;
 	if(thisDepth == -1.0) {

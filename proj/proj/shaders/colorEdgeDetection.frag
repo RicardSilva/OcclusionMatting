@@ -62,7 +62,7 @@ vec4 sobel3x3(vec2 coords) {
 	
 	
 	float magnitude = sqrt(gradX * gradX + gradY * gradY);
-	return vec4(magnitude, (gradX + 1) / 2, (gradY + 1) / 2, 0.9);
+	return vec4(magnitude, (clamp(gradX, -1, 1) + 1) / 2, (clamp(gradY, -1, 1) + 1) / 2, 0.9);
 	
 }
 
@@ -80,7 +80,7 @@ void main() {
 	if(result.r < 0.35) 
 		colorOut = vec4(0,0,0,1);		
 	else
-		colorOut = result;
+		colorOut = vec4(result.g, result.b, 0, 0.9);
 	
 	
 }

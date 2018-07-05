@@ -56,19 +56,21 @@ vec4 sobel3x3(vec2 coords) {
 	gradX += samples[7].g * -2;
 	gradX += samples[8].g * -1;
 	
-	gradY += samples[0].g * 1;
+	gradY += samples[0].g * -1;
 	//gradY += samples[1].g * 0;
-	gradY += samples[2].g * -1;
-	gradY += samples[3].g * 2;
+	gradY += samples[2].g * 1;
+	
+	gradY += samples[3].g * -2;
 	//gradY += samples[4].g * 0;
-	gradY += samples[5].g * -2;
-	gradY += samples[6].g * 1;
+	gradY += samples[5].g * 2;
+	
+	gradY += samples[6].g * -1;
 	//gradY += samples[7].g * 0;
-	gradY += samples[8].g * -1;
+	gradY += samples[8].g * 1;
 	
 	
 	float magnitude = sqrt(gradX * gradX + gradY * gradY);
-	return vec4(magnitude, (gradX + 1) / 2, (gradY + 1) / 2, 0.9);
+	return vec4(magnitude, (clamp(gradX, -1, 1) + 1) / 2, (clamp(gradY, -1, 1) + 1) / 2, 0.9);
 	
 }
 
@@ -79,9 +81,9 @@ void main() {
 	
 	colorOut = vec4(0,0,0,1);
 	vec4 result = sobel3x3(texC);	
-	if(result.a < 0.1)
+	if(result.r < 0.3)
 		colorOut = texture(coarseTrimap, texC);
 	else
-		colorOut = result;
+		colorOut = vec4(result.g, result.b, 0, 0.9);
 	
 }

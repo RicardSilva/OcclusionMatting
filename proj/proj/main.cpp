@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA | GLUT_MULTISAMPLE);
 	
-	glutInitContextVersion(3, 3);
+	glutInitContextVersion(4, 4);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutInitContextFlags(GLUT_FORWARD_COMPATIBLE | GLUT_DEBUG);
 
@@ -103,6 +103,7 @@ int main(int argc, char **argv) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(0.53, 0.81, 0.92, 0);
 	gm = new GameManager();
 	gm->init();

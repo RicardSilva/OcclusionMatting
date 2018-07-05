@@ -85,11 +85,11 @@ bool expandUnknown(vec2 coords) {
 
 	for(int i = 0; i < 25; i++) {
 		vec4 trimapColor = texture(trimapEdge, coords + offsets[i]);
-		if(trimapColor.a == 0.9) {
+		if(trimapColor.a < 1) {
 			vec4 label = texture(unknownLabels, coords + offsets[i]);
 			if(label == vec4(1,0,0,1)) { //front half space -> RED 
-				vec2 unknownPixelDirection = vec2(trimapColor.g * 2 - 1, trimapColor.b * 2 - 1);
-				if(dot(unknownPixelDirection, directions[i]) >= 0) {
+				vec2 unknownPixelDirection = vec2(trimapColor.r * 2 - 1, trimapColor.g * 2 - 1);
+				if(dot(unknownPixelDirection, -directions[i]) >= 0) {
 					//frontHalf
 					return true;
 				}
@@ -98,8 +98,8 @@ bool expandUnknown(vec2 coords) {
 				}
 			} 
 			else if(label == vec4(0,1,0,1)) { //back half space -> GREEN
-				vec2 unknownPixelDirection = vec2(trimapColor.g * 2 - 1, trimapColor.b * 2 - 1);
-				if(dot(unknownPixelDirection, directions[i]) >= 0) {
+				vec2 unknownPixelDirection = vec2(trimapColor.r * 2 - 1, trimapColor.g * 2 - 1);
+				if(dot(unknownPixelDirection, -directions[i]) >= 0) {
 					//frontHalf -> do nothing
 				}
 				else {
@@ -131,7 +131,7 @@ void main() {
 	if(trimapColor == vec4(1,0,0,1)){ //invalid area
 		colorOut = trimapColor;
 	}	
-	else if(trimapColor.a == 0.9) { //already unknown 
+	else if(trimapColor.a < 1) { //already unknown 
 		colorOut = vec4(0.5,0.5,0.5,0.9); // unknown -> grey
 	}
 	else {
@@ -143,6 +143,6 @@ void main() {
 		}
 		
 	}
-	colorOut  = texture(trimapEdge, texC);
+	
 	
 }
