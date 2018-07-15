@@ -30,7 +30,10 @@ private:
 	GLint realColorEdgeID;
 	GLint unknownLabelsID;
 	GLint finalTrimapID;
-	GLint foregroundColorID;
+
+	GLint imageInputSourceID;
+	GLint modeID;
+	GLint mipmapLevelID;
 
 
 
@@ -59,7 +62,9 @@ public:
 		realColorEdgeID = getUniformLocation("realColorEdge");
 		unknownLabelsID = getUniformLocation("unknownLabels");
 		finalTrimapID = getUniformLocation("finalTrimap");
-		foregroundColorID = getUniformLocation("foregroundColor");
+		imageInputSourceID = getUniformLocation("inputTexture");
+		modeID = getUniformLocation("mode");
+		mipmapLevelID = getUniformLocation("mipmapLevel");
 	}
 	void bindTextureUnits() {
 		Shader::loadInt(virtualColorID, 0);
@@ -72,7 +77,6 @@ public:
 		Shader::loadInt(realColorEdgeID, 7);
 		Shader::loadInt(unknownLabelsID, 8);
 		Shader::loadInt(finalTrimapID, 9);
-		Shader::loadInt(foregroundColorID, 10);
 	}
 
 	void loadVirtualColor(GLint id) {
@@ -86,6 +90,15 @@ public:
 	}
 	void loadRealDepth(GLint id) {
 		Shader::loadInt(realDepthID, id);
+	}
+	void loadImageSource(int source) {
+		Shader::loadInt(imageInputSourceID, source);
+	}
+	void loadMode(int mode) {
+		Shader::loadInt(modeID, mode);
+	}
+	virtual void loadMipmapLevel(int level) {
+		Shader::loadInt(imageInputSourceID, level);
 	}
 
 	void loadMatrices() {

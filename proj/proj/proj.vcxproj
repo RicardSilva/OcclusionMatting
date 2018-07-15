@@ -26,6 +26,7 @@
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="ImagePyramid.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LightShader.h" />
     <ClInclude Include="MathHelper.h" />

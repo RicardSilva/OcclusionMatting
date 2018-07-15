@@ -25,4 +25,5 @@ void main () {
 	DataOut.texCoord = texCoord;
 
 	gl_Position = m_pvm * position;	
+	
 }

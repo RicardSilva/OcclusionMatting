@@ -52,13 +52,13 @@ class GameManager {
 
 	Shader* shader;
 	Shader* depthSmoothingShader;
+	Shader* invertRealColorShader;
 	Shader* coarseTrimapShader;
 	Shader* edgeDetectionShader;
 	Shader* colorEdgeDetectionShader;
 	Shader* edgeLabelingShader;
 	Shader* unknownDilationShader;
 	Shader* foregroundPropagationShader;
-	Shader* piramidSmoothingShader;
 
 
 	Camera* activeCamera;
@@ -69,12 +69,13 @@ class GameManager {
 
 	FrameBuffer* virtualFbo;
 	FrameBuffer* smoothDepthFbo;
+	FrameBuffer* invertRealColorFbo;
 	FrameBuffer* coarseTrimapFbo;
 	FrameBuffer* trimapEdgeFbo;
 	FrameBuffer* realColorEdgeFbo;
 	FrameBuffer* unknownLabelsFbo;
 	FrameBuffer* finalTrimapFbo;
-	FrameBuffer* foregroundPropagationFbo;
+	
 
 
 	GLuint virtualColorTexture;
@@ -83,12 +84,12 @@ class GameManager {
 	GLuint realDepthTexture;
 
 	GLuint smoothRealDepthTexture;
+	GLuint invertedRealColorTexture;
 	GLuint coarseTrimapTexture;
 	GLuint trimapEdgeTexture;
 	GLuint realColorEdgeTexture;
 	GLuint unknownLabelsTexture;
 	GLuint finalTrimapTexture;
-	GLuint foregroundPropagationTexture;
 	
 
 

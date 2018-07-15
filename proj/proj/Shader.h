@@ -62,6 +62,9 @@ public:
 	virtual void loadVirtualDepth(GLint id) {}
 	virtual void loadRealColor(GLint id) {}
 	virtual void loadRealDepth(GLint id) {}
+	virtual void loadImageSource(int source) {}
+	virtual void loadMode(int mode) {}
+	virtual void loadMipmapLevel(int level) {}
 
 	void loadInt(GLint location, GLint i);
 	void loadFloat(GLint location, GLfloat f);

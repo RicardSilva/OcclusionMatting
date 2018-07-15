@@ -72,10 +72,9 @@ void main() {
 			
 	
 	colorOut = vec4(0,0,0,1);
-	vec2 v_texcoord = vec2(texC.s, 1.0 - texC.t);
 	
 	
-	vec4 result = sobel3x3(v_texcoord);	
+	vec4 result = sobel3x3(texC);	
 	
 	if(result.r < 0.35) 
 		colorOut = vec4(0,0,0,1);		

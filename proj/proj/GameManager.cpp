@@ -91,6 +91,10 @@ void GameManager::initFrameBuffers() {
 	smoothRealDepthTexture = smoothDepthFbo->getColorTexture();
 	frameBuffers.push_back(smoothDepthFbo);
 
+	invertRealColorFbo = new FrameBuffer(WIDTH, HEIGHT);
+	invertedRealColorTexture = invertRealColorFbo->getColorTexture();
+	frameBuffers.push_back(invertRealColorFbo);
+
 	coarseTrimapFbo = new FrameBuffer(WIDTH, HEIGHT);
 	coarseTrimapTexture = coarseTrimapFbo->getColorTexture();
 	frameBuffers.push_back(coarseTrimapFbo);
@@ -111,9 +115,7 @@ void GameManager::initFrameBuffers() {
 	finalTrimapTexture = finalTrimapFbo->getColorTexture();
 	frameBuffers.push_back(finalTrimapFbo);
 
-	foregroundPropagationFbo = new MultipleLevelsFrameBuffer(1024, 1024, 5);
-	foregroundPropagationTexture = foregroundPropagationFbo->getColorTexture();
-	frameBuffers.push_back(foregroundPropagationFbo);
+
 
 }
 void GameManager::initShaders() {
@@ -125,6 +127,12 @@ void GameManager::initShaders() {
 	depthSmoothingShader->bindTextureUnits();
 	depthSmoothingShader->unUse();
 	ShaderManager::instance()->addShader("depthSmoothing", depthSmoothingShader);
+
+	invertRealColorShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/invertRealColor.frag");
+	invertRealColorShader->use();
+	invertRealColorShader->bindTextureUnits();
+	invertRealColorShader->unUse();
+	ShaderManager::instance()->addShader("invertRealColor", invertRealColorShader);
 
 	coarseTrimapShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/coarseTrimap.frag");
 	coarseTrimapShader->use();
@@ -156,17 +164,19 @@ void GameManager::initShaders() {
 	unknownDilationShader->unUse();
 	ShaderManager::instance()->addShader("unknownDilation", unknownDilationShader);
 
-	foregroundPropagationShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/foregroundPropagation.frag");
-	foregroundPropagationShader->use();
-	foregroundPropagationShader->bindTextureUnits();
-	foregroundPropagationShader->unUse();
-	ShaderManager::instance()->addShader("foregroundPropagation", foregroundPropagationShader);
+	Shader* imagePropagationShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/imagePropagation.frag");
+	imagePropagationShader->use();
+	imagePropagationShader->bindTextureUnits();
+	imagePropagationShader->unUse();
+	ShaderManager::instance()->addShader("imagePropagation", imagePropagationShader);
 
-	piramidSmoothingShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/piramidSmoothing.frag");
+	Shader* piramidSmoothingShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/cubicInterpolation.frag");
 	piramidSmoothingShader->use();
 	piramidSmoothingShader->bindTextureUnits();
 	piramidSmoothingShader->unUse();
 	ShaderManager::instance()->addShader("piramidSmoothing", piramidSmoothingShader);
+
+	
 }
 void GameManager::initLights() {
 	directionalLight = new DirectionalLight(vec4(0, 0, -1, 0), vec3(1, 1, 1), 0.5f);
@@ -230,14 +240,14 @@ void GameManager::update(double timeStep) {
 }
 void GameManager::display() {	
 	FrameCount++;
-	
+	glClearColor(0.53, 0.81, 0.92, 0);
 	for (auto fbo : frameBuffers) {
 		fbo->bindFrameBuffer();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		fbo->unbindCurrentFrameBuffer();
 	}
 
-
+	glClearColor(0.9, 0.81, 0.92, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	loadIdentity(MODEL);
@@ -269,6 +279,15 @@ void GameManager::display() {
 
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, smoothRealDepthTexture);
+
+	invertRealColorFbo->bindFrameBuffer();
+	invertRealColorShader->use();
+	plane->draw2();
+	invertRealColorShader->unUse();
+	invertRealColorFbo->unbindCurrentFrameBuffer();
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, invertedRealColorTexture);
 
 	coarseTrimapFbo->bindFrameBuffer();
     coarseTrimapShader->use();
@@ -315,39 +334,43 @@ void GameManager::display() {
 	glActiveTexture(GL_TEXTURE9);
 	glBindTexture(GL_TEXTURE_2D, finalTrimapTexture);
 
-	//FOREGROUND PROPAGATION
-	for (int step = 0; step < DIFFUSION_STEPS; step++) {
+	////FOREGROUND PROPAGATION
+	//for (int step = 0; step < DIFFUSION_STEPS; step++) {
 
-		//copy foreground into image E
-		//apply propagation shader to image E
-		foregroundPropagationFbo->bindFrameBuffer();
-		foregroundPropagationShader->use();
-		plane->draw2();
-		foregroundPropagationShader->unUse();
-		foregroundPropagationFbo->unbindCurrentFrameBuffer();
-		
+	//	//copy foreground into image E
+	//	//apply propagation shader to image E
+	//	foregroundPropagationFbo->bindFrameBuffer();
+	//	foregroundPropagationShader->use();
+	//	plane->draw2();
+	//	foregroundPropagationShader->unUse();
+	//	foregroundPropagationFbo->unbindCurrentFrameBuffer();
+	//	
 
-		//generate mipmap levels for image 
-		glActiveTexture(GL_TEXTURE10);
-		glBindTexture(GL_TEXTURE_2D, foregroundPropagationTexture);
-		glGenerateMipmap(GL_TEXTURE_2D);
+	//	//generate mipmap levels for image 
+	//	glActiveTexture(GL_TEXTURE10);
+	//	glBindTexture(GL_TEXTURE_2D, foregroundPropagationTexture);
+	//	glGenerateMipmap(GL_TEXTURE_2D);
 
-		//go over every level of the piramid and smooth color
-		for (int level = PIRAMID_LEVELS; level >= 0; level--) {
-			piramidSmoothingShader->use();
-			plane->draw2();
-			piramidSmoothingShader->unUse();		
-		}
+	//	//go over every level of the piramid and smooth color
+	//	for (int level = PIRAMID_LEVELS; level >= 0; level--) {
+	//		piramidSmoothingShader->use();
+	//		plane->draw2();
+	//		piramidSmoothingShader->unUse();		
+	//	}
+	//
+
+	//	//output final smooth color value to final foreground Color
+	//
+	//}
+
+	loadIdentity(MODEL);
+
+	activeCamera->computeView();
+	activeCamera->computeProjection(1024, 1024);
 	
+	glViewport(448,28, 1024, 1024);
+	cube->draw();
 
-		//output final smooth color value to final foreground Color
-	
-	}
-
-	
-
-
-;
 
 	glutSwapBuffers();
 	
