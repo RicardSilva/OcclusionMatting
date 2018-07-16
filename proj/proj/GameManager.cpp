@@ -176,6 +176,12 @@ void GameManager::initShaders() {
 	piramidSmoothingShader->unUse();
 	ShaderManager::instance()->addShader("piramidSmoothing", piramidSmoothingShader);
 
+	Shader* finalOutputShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/alphaEstimation.frag");
+	finalOutputShader->use();
+	finalOutputShader->bindTextureUnits();
+	finalOutputShader->unUse();
+	ShaderManager::instance()->addShader("finalOutput", finalOutputShader);
+
 	
 }
 void GameManager::initLights() {
@@ -334,42 +340,12 @@ void GameManager::display() {
 	glActiveTexture(GL_TEXTURE9);
 	glBindTexture(GL_TEXTURE_2D, finalTrimapTexture);
 
-	////FOREGROUND PROPAGATION
-	//for (int step = 0; step < DIFFUSION_STEPS; step++) {
 
-	//	//copy foreground into image E
-	//	//apply propagation shader to image E
-	//	foregroundPropagationFbo->bindFrameBuffer();
-	//	foregroundPropagationShader->use();
-	//	plane->draw2();
-	//	foregroundPropagationShader->unUse();
-	//	foregroundPropagationFbo->unbindCurrentFrameBuffer();
-	//	
-
-	//	//generate mipmap levels for image 
-	//	glActiveTexture(GL_TEXTURE10);
-	//	glBindTexture(GL_TEXTURE_2D, foregroundPropagationTexture);
-	//	glGenerateMipmap(GL_TEXTURE_2D);
-
-	//	//go over every level of the piramid and smooth color
-	//	for (int level = PIRAMID_LEVELS; level >= 0; level--) {
-	//		piramidSmoothingShader->use();
-	//		plane->draw2();
-	//		piramidSmoothingShader->unUse();		
-	//	}
-	//
-
-	//	//output final smooth color value to final foreground Color
-	//
-	//}
-
-	loadIdentity(MODEL);
-
-	activeCamera->computeView();
-	activeCamera->computeProjection(1024, 1024);
+	//TODO: image pyramid stuff
 	
-	glViewport(448,28, 1024, 1024);
-	cube->draw();
+	finalOutputShader->use();
+	plane->draw2();
+	finalOutputShader->unUse();
 
 
 	glutSwapBuffers();

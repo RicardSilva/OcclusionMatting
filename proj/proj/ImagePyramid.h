@@ -63,7 +63,33 @@ public:
 		model = ModelManager::instance()->getModel("plane");
 		plane = new GameObject(vec3(0, 0, 0), nullptr, model);
 
-}
+	}
+
+	void expandForeground() {
+	
+		for (int step = 0; step < iterations; step++) {
+
+			analize();
+			sintetize();
+
+		}
+
+		glActiveTexture(GL_TEXTURE11);
+		glBindTexture(GL_TEXTURE_2D, outputTexture);
+	
+	}
+	void expandBackground() {
+		for (int step = 0; step < iterations; step++) {
+
+			analize();
+			sintetize();
+
+		}
+
+		glActiveTexture(GL_TEXTURE12);
+		glBindTexture(GL_TEXTURE_2D, outputTexture);
+
+	}
 
 	void analize() {	//go from higher level of detail to lower level of detail
 		//copy foreground into image E
@@ -99,6 +125,9 @@ public:
 
 		glActiveTexture(GL_TEXTURE10);
 		glBindTexture(GL_TEXTURE_2D, outputTexture);
+
+
+		//TODO: FINAL STEPS
 	}
 
 

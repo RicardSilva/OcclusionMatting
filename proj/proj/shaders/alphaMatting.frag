@@ -64,33 +64,6 @@ float computeAlpha() {
 }
 */
 
-float lowPassFilter3x3(vec2 coords) {
-	float result = 0.0;
-	float counter = 0.0;
-	float samples [9] = float[9](
-	texture(realDepth, coords + vec2(-offsetX,offsetY)).r,
-	texture(realDepth, coords + vec2(-offsetX,0)).r,
-	texture(realDepth, coords + vec2(-offsetX,-offsetY)).r,
-	texture(realDepth, coords + vec2(0,offsetY)).r,
-	texture(realDepth, coords + vec2(0,0)).r,
-	texture(realDepth, coords + vec2(0,-offsetY)).r,
-	texture(realDepth, coords + vec2(offsetX,offsetY)).r,
-	texture(realDepth, coords + vec2(offsetX,0)).r,
-	texture(realDepth, coords + vec2(offsetX,-offsetY)).r);
-	
-	for(int i = 0; i < 9; i++) {
-		
-		if(samples[i] != -1) {
-			result += samples[i];
-			counter += 1;
-		}
-	}	
-
-
-	
-	return result / counter;
-	
-}
 
 
 int evaluateLayer(vec2 coords) {
