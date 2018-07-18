@@ -61,6 +61,9 @@ void GameManager::init() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	realDepthTexture = texture2;
 
+	foregroundPyramid = new ImagePyramid(0,5,5);
+	backgroundPyramid = new ImagePyramid(1,5,5);
+
 }
 
 bool GameManager::initKinect() {
@@ -176,11 +179,23 @@ void GameManager::initShaders() {
 	piramidSmoothingShader->unUse();
 	ShaderManager::instance()->addShader("piramidSmoothing", piramidSmoothingShader);
 
-	Shader* finalOutputShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/alphaEstimation.frag");
+	finalOutputShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/alphaEstimation.frag");
 	finalOutputShader->use();
 	finalOutputShader->bindTextureUnits();
 	finalOutputShader->unUse();
 	ShaderManager::instance()->addShader("finalOutput", finalOutputShader);
+
+	Shader* copyShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/copyShader.frag");
+	copyShader->use();
+	copyShader->bindTextureUnits();
+	copyShader->unUse();
+	ShaderManager::instance()->addShader("copy", copyShader);
+
+	Shader* debugShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/debugShader.frag");
+	debugShader->use();
+	debugShader->bindTextureUnits();
+	debugShader->unUse();
+	ShaderManager::instance()->addShader("debug", debugShader);
 
 	
 }
@@ -341,11 +356,14 @@ void GameManager::display() {
 	glBindTexture(GL_TEXTURE_2D, finalTrimapTexture);
 
 
+	foregroundPyramid->expandImage();
+	//backgroundPyramid->expandImage();
+
 	//TODO: image pyramid stuff
 	
-	finalOutputShader->use();
-	plane->draw2();
-	finalOutputShader->unUse();
+	//finalOutputShader->use();
+	//plane->draw2();
+	//finalOutputShader->unUse();
 
 
 	glutSwapBuffers();

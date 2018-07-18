@@ -18,10 +18,6 @@ uniform sampler2D expandedBackground;
 const float zNear = 0.1;
 const float zFar = 8000.0;
 
-const int INVALID = -1;
-const int UKNOWN = 2;
-const int BACKGROUND = 1;
-const int FOREGROUND = 0;
 
 const float resX = 1920.0;
 const float resY = 1080.0;
@@ -29,6 +25,7 @@ const float resY = 1080.0;
 const float offsetX = 1.0 / resX;
 const float offsetY = 1.0 / resY;
 
+/*
 float alphaEstimation(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelColor) {
 	float l = length(foregroundColor - backgroundColor);
 	return((pixelColor - backgroundColor) 
@@ -37,7 +34,9 @@ float alphaEstimation(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelColo
 }
 
 float colorCost(vec4 foregroundColor, vec4 backgroundColor,
-				vec4 pixelColor, float alpha) {
+				vec4 pixelColor) {
+					
+	float alpha = alphaEstimation(foregroundColor, backgroundColor, pixelColor);
 	
 	return length(pixelColor 
 		- (alpha * foregroundColor 
@@ -61,7 +60,7 @@ float objectiveFunction(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelCo
 
 float computeAlpha() {
 	//find best sample pair among neighbors using objectiveFunction
-	vec4 pixelColor = vec4(); //FIX ME: WHAT IS Ip SUPPOSED TO BE?
+	vec4 pixelColor = vec4(0,0,0,0); //FIX ME: WHAT IS Ip SUPPOSED TO BE?
 	
 	
 	vec4 foregroundSamples [9] = vec4[9](
@@ -106,10 +105,10 @@ float computeAlpha() {
 }
 
 
-
+*/
 
 void main() {
-		
+	/*	
 	vec4 trimapColor = texture(finalTrimap, texC);
 	if(trimapColor == vec4(1,0,0,1)) {//RED -> REAL COLOR
 		colorOut = texture(realColor, texC);
@@ -124,33 +123,9 @@ void main() {
 		float alpha = computeAlpha();
 		colorOut = alpha * texture(realColor, texC) + (1 - alpha) * texture(virtualColor, texC);
 	}
+	*/
+	colorOut = texture(expandedForeground, texC);
 	
 }
 
 
-
-
-
-
-
-
-	//RAW DEPTH OCCLUSION
-	/*
-	float z_b = texture(virtualDepth, texC).r;	 
-	float depthV = (2.0 * zNear) / (zFar + zNear - z_b * (zFar - zNear));
-	vec4 colorV = texture(virtualColor, texC);
-	
-	vec2 v_texcoord = vec2(texC.s, 1.0 - texC.t);
-	float depthR = texture(realDepth, v_texcoord).r;	
-	vec4 colorR = texture(realColor, v_texcoord);
-
-	if(depthR == 1 && depthV < 0.9)
-		colorOut = colorV;
-	else if(depthR == -1 && depthV < 0.9)
-		colorOut = colorR;
-	else if(depthR < depthV || depthV > 0.9 )
-		colorOut = colorR;
-	else
-		colorOut = colorV;
-	
-	*/

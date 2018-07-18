@@ -24,6 +24,7 @@
 #include "Mesh.h"
 #include "FrameBuffer.h"
 #include "MultipleLevelsFrameBuffer.h"
+#include "ImagePyramid.h"
 
 #include <Ole2.h>
 #include <Windows.h>
@@ -96,7 +97,7 @@ class GameManager {
 
 
 	// Intermediate Buffers
-	GLubyte colorData[CWIDTH*CHEIGHT * 4];    // Stores RGB color image
+	GLubyte colorData[CWIDTH*CHEIGHT * 4];    // Stores RGBA color image
 	float depthData[CWIDTH*CHEIGHT];		  // Stores RGB depth image
 	DepthSpacePoint colorDataInDepthSpace[CWIDTH*CHEIGHT];             // Maps depth rgb pixels to depth pixels
 
@@ -104,6 +105,9 @@ class GameManager {
 	IKinectSensor* sensor;             // Kinect sensor
 	IMultiSourceFrameReader* reader;   // Kinect data source
 	ICoordinateMapper* mapper;         // Converts between depth, color, and 3d coordinates
+
+	ImagePyramid* foregroundPyramid;
+	ImagePyramid* backgroundPyramid;
 
 
 

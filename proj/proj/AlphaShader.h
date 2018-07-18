@@ -37,6 +37,8 @@ private:
 	GLint expandedForegroundID;
 	GLint expandedBackgroundID;
 
+	GLint debugTextureID;
+
 
 
 public:
@@ -69,6 +71,8 @@ public:
 		mipmapLevelID = getUniformLocation("mipmapLevel");
 		expandedForegroundID = getUniformLocation("expandedForeground");
 		expandedBackgroundID = getUniformLocation("expandedBackground");
+
+		debugTextureID = getUniformLocation("debugTexture");
 	}
 	void bindTextureUnits() {
 		Shader::loadInt(virtualColorID, 0);
@@ -81,8 +85,10 @@ public:
 		Shader::loadInt(realColorEdgeID, 7);
 		Shader::loadInt(unknownLabelsID, 8);
 		Shader::loadInt(finalTrimapID, 9);
-		Shader::loadInt(expandedForegroundID, 11);
-		Shader::loadInt(expandedBackgroundID, 12);
+		Shader::loadInt(expandedForegroundID, 14);
+		Shader::loadInt(expandedBackgroundID, 15);
+
+		Shader::loadInt(debugTextureID, 11);
 	}
 
 	void loadVirtualColor(GLint id) {
@@ -104,7 +110,7 @@ public:
 		Shader::loadInt(modeID, mode);
 	}
 	virtual void loadMipmapLevel(int level) {
-		Shader::loadInt(imageInputSourceID, level);
+		Shader::loadInt(mipmapLevelID, level);
 	}
 
 	void loadMatrices() {
