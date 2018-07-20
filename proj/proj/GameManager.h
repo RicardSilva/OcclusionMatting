@@ -59,6 +59,7 @@ class GameManager {
 	Shader* colorEdgeDetectionShader;
 	Shader* edgeLabelingShader;
 	Shader* unknownDilationShader;
+	Shader* debugShader;
 
 	Shader* finalOutputShader;
 

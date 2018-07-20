@@ -32,8 +32,9 @@ private:
 	GLint finalTrimapID;
 
 	GLint imageInputSourceID;
+	GLint imageInputSource2ID;
+	GLint iterationID;
 	GLint modeID;
-	GLint mipmapLevelID;
 	GLint expandedForegroundID;
 	GLint expandedBackgroundID;
 
@@ -70,8 +71,9 @@ public:
 		unknownLabelsID = getUniformLocation("unknownLabels");
 		finalTrimapID = getUniformLocation("finalTrimap");
 		imageInputSourceID = getUniformLocation("inputTexture");
+		imageInputSource2ID = getUniformLocation("inputTexture2");
+		iterationID = getUniformLocation("iteration");
 		modeID = getUniformLocation("mode");
-		mipmapLevelID = getUniformLocation("mipmapLevel");
 		expandedForegroundID = getUniformLocation("expandedForeground");
 		expandedBackgroundID = getUniformLocation("expandedBackground");
 
@@ -95,7 +97,7 @@ public:
 		Shader::loadInt(expandedForegroundID, 14);
 		Shader::loadInt(expandedBackgroundID, 15);
 
-		Shader::loadInt(debugTextureID, 11);
+		Shader::loadInt(debugTextureID, 10);
 	}
 
 	void loadVirtualColor(GLint id) {
@@ -113,11 +115,15 @@ public:
 	void loadImageSource(int source) {
 		Shader::loadInt(imageInputSourceID, source);
 	}
+	void loadImageSource2(int source) {
+		Shader::loadInt(imageInputSource2ID, source);
+	}
+
+	void loadIteration(int i) {
+		Shader::loadInt(iterationID, i);
+	}
 	void loadMode(int mode) {
 		Shader::loadInt(modeID, mode);
-	}
-	void loadMipmapLevel(int level) {
-		Shader::loadInt(mipmapLevelID, level);
 	}
 
 	void loadTextureWidth(float width) {

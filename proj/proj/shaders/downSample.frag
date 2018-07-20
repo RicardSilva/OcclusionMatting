@@ -51,6 +51,7 @@ vec4 gaussianBlur3x3() {
 		}
 		else {
 			result += samples[i] * weights[i] / 16.0;
+		}
 		
 	}	
 

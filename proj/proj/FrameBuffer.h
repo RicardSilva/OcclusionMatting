@@ -38,7 +38,7 @@ public:
 	}
 	void unbindCurrentFrameBuffer() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, width, height);
+		glViewport(0, 0, 1920, 1080);
 	}
 
 	int getColorTexture() {

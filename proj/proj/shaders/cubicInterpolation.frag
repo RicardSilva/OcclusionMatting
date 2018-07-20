@@ -36,8 +36,8 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord) {
     float texelSizeY = 1.0 / textureHeight; //size of one texel 
     vec4 nSum = vec4( 0.0, 0.0, 0.0, 0.0 );
     vec4 nDenom = vec4( 0.0, 0.0, 0.0, 0.0 );
-    float a = fract( TexCoord.x * resX ); // get the decimal part
-    float b = fract( TexCoord.y * resY ); // get the decimal part
+    float a = fract( TexCoord.x * textureWidth ); // get the decimal part
+    float b = fract( TexCoord.y * textureHeight ); // get the decimal part
     for( int m = -1; m <=2; m++ )
     {
         for( int n =-1; n<= 2; n++)
@@ -56,6 +56,7 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord) {
 
 
 void main() {
-			
 	colorOut = BiCubic(inputTexture, texC);
+
+	
 }

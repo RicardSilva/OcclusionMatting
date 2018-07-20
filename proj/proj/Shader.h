@@ -63,8 +63,9 @@ public:
 	virtual void loadRealColor(GLint id) {}
 	virtual void loadRealDepth(GLint id) {}
 	virtual void loadImageSource(int source) {}
+	virtual void loadImageSource2(int source) {}
+	virtual void loadIteration(int i) {}
 	virtual void loadMode(int mode) {}
-	virtual void loadMipmapLevel(int level) {}
 
 	virtual void loadTextureWidth(float width) {}
 	virtual void loadTextureHeight(float height) {}

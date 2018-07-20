@@ -61,8 +61,8 @@ void GameManager::init() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	realDepthTexture = texture2;
 
-	foregroundPyramid = new ImagePyramid(0,5,5);
-	backgroundPyramid = new ImagePyramid(1,5,5);
+	foregroundPyramid = new ImagePyramid(0,4,5);
+	backgroundPyramid = new ImagePyramid(1,4,5);
 
 }
 
@@ -180,24 +180,35 @@ void GameManager::initShaders() {
 	copyShader->unUse();
 	ShaderManager::instance()->addShader("copy", copyShader);
 
+	Shader* initializeAlphaShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/initializeFAlpha.frag");
+	initializeAlphaShader->use();
+	initializeAlphaShader->bindTextureUnits();
+	initializeAlphaShader->unUse();
+	ShaderManager::instance()->addShader("iniAlpha", initializeAlphaShader);
 
 	Shader* preProcessShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/preProcess.frag");
 	preProcessShader->use();
 	preProcessShader->bindTextureUnits();
 	preProcessShader->unUse();
 	ShaderManager::instance()->addShader("preProcess", preProcessShader);
-
+	
 	Shader* downSamplerShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/downSample.frag");
 	downSamplerShader->use();
 	downSamplerShader->bindTextureUnits();
 	downSamplerShader->unUse();
 	ShaderManager::instance()->addShader("pyramidBuilder", downSamplerShader);
-
+	
 	Shader* piramidSmoothingShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/cubicInterpolation.frag");
 	piramidSmoothingShader->use();
 	piramidSmoothingShader->bindTextureUnits();
 	piramidSmoothingShader->unUse();
 	ShaderManager::instance()->addShader("piramidSmoothing", piramidSmoothingShader);
+
+	Shader* posProcessShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/posProcess.frag");
+	posProcessShader->use();
+	posProcessShader->bindTextureUnits();
+	posProcessShader->unUse();
+	ShaderManager::instance()->addShader("posProcess", posProcessShader);
 
 	finalOutputShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/alphaEstimation.frag");
 	finalOutputShader->use();
@@ -207,7 +218,7 @@ void GameManager::initShaders() {
 
 	
 
-	Shader* debugShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/debugShader.frag");
+	debugShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/debugShader.frag");
 	debugShader->use();
 	debugShader->bindTextureUnits();
 	debugShader->unUse();
@@ -371,15 +382,15 @@ void GameManager::display() {
 	glActiveTexture(GL_TEXTURE9);
 	glBindTexture(GL_TEXTURE_2D, finalTrimapTexture);
 
-
-	foregroundPyramid->expandImage();
-	//backgroundPyramid->expandImage();
-
 	//TODO: image pyramid stuff
-	
+	foregroundPyramid->expandImage();
+	backgroundPyramid->expandImage();
+
 	//finalOutputShader->use();
 	//plane->draw2();
 	//finalOutputShader->unUse();
+
+
 
 
 	glutSwapBuffers();
