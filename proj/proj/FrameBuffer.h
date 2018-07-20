@@ -4,8 +4,8 @@
 #include "GL/freeglut.h"
 class FrameBuffer {
 protected:
-	int WIDTH;
-	int HEIGHT;
+	int width;
+	int height;
 
 	GLuint frameBuffer;
 	GLuint colorTexture;
@@ -13,14 +13,14 @@ protected:
 
 
 public:
-	FrameBuffer(int width, int height) : WIDTH(width), HEIGHT(height) {
+	FrameBuffer(int width, int height) : width(width), height(height) {
 		frameBuffer = createFrameBuffer();
-		colorTexture = createTextureAttachment(width, height);
-		depthTexture = createDepthTextureAttachment(width, height);
+		colorTexture = createTextureAttachment();
+		depthTexture = createDepthTextureAttachment();
 		unbindCurrentFrameBuffer();
 	}
 
-	FrameBuffer(int width, int height, int a) : WIDTH(width), HEIGHT(height) {
+	FrameBuffer(int width, int height, int a) : width(width), height(height) {
 		
 	}
 
@@ -32,11 +32,11 @@ public:
 
 	void bindFrameBuffer() {
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-		glViewport(0, 0, WIDTH, HEIGHT);
+		glViewport(0, 0, width, height);
 	}
 	void unbindCurrentFrameBuffer() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, WIDTH, HEIGHT);
+		glViewport(0, 0, width, height);
 	}
 
 	int getColorTexture() {
@@ -62,7 +62,7 @@ protected:
 		return frameBuffer;
 	}
 
-	virtual int createTextureAttachment(int width, int height) {
+	virtual int createTextureAttachment() {
 		GLuint texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -76,7 +76,7 @@ protected:
 		glBindTexture(GL_TEXTURE_2D, 0);
 		return texture;
 	}
-	int createDepthTextureAttachment(int width, int height) {
+	int createDepthTextureAttachment() {
 		GLuint texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);

@@ -23,8 +23,14 @@ class ImagePyramid {
 	int outputImage;
 
 
+	std::vector<GLuint> multiLevelTextures;
+	std::vector<FrameBuffer*> multiLevelFbos;
+
+
+
 	GLuint copyTexture;
 	GLuint outputTexture;
+
 	GLuint imagePropagationTexture;
 	FrameBuffer* downwardPropagationFbo;
 	std::vector<FrameBuffer*> upwardPropagationFbos;
@@ -130,8 +136,11 @@ public:
 			f->unbindCurrentFrameBuffer();
 		}*/
 
+		//source -> 10 -> 11 ->output
 
-	
+
+
+		
 		textureCopyFbo->bindFrameBuffer();
 		copyShader->use();
 		copyShader->loadImageSource(inputImage);
@@ -139,17 +148,57 @@ public:
 		copyShader->unUse();
 		textureCopyFbo->unbindCurrentFrameBuffer();
 
-
 		glActiveTexture(GL_TEXTURE10);
 		glBindTexture(GL_TEXTURE_2D, copyTexture);
 
-		//for (int step = 0; step < iterations; step++) {
+		
+
+	
+	
+
+		for (int step = 0; step < iterations; step++) {
+
+			//copy input image into image E an
+			downwardPropagationFbo->bindFrameBuffer();
+			imagePropagationShader->use();
+			imagePropagationShader->loadImageSource(10);
+			imagePropagationShader->loadMode(mode);
+			plane->draw2();
+			imagePropagationShader->unUse();
+			downwardPropagationFbo->unbindCurrentFrameBuffer();
+
+			glActiveTexture(GL_TEXTURE11);
+			glBindTexture(GL_TEXTURE_2D, imagePropagationTexture);
+		
+			
+			glGenerateMipmap(GL_TEXTURE_2D);
 
 
-			analize();
-			sintetize();
+			for (int level = levels - 1; level > 0; level--) {
+				//draw low level into next higher level
+				//upwardPropagationFbos[level-1]->bindFrameBuffer();
+				cubicInterpolationShader->use();
+				cubicInterpolationShader->loadImageSource(11);
+				cubicInterpolationShader->loadMipmapLevel(level);
+				plane->draw2();
+				cubicInterpolationShader->unUse();
+				/*upwardPropagationFbos[level-1]->unbindCurrentFrameBuffer();
+				glActiveTexture(GL_TEXTURE11);
+				glBindTexture(GL_TEXTURE_2D, outputTexture);*/
 
-		//}
+
+				//glCopyTexSubImage2D(GL_TEXTURE_2D, level-1, 0, 0, 0, 0, x, y);
+				//glTexImage2D(GL_TEXTURE_2D, level - 1, GL_RGBA, 1920, 1080, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+				//glActiveTexture(GL_TEXTURE11);
+				//glBindTexture(GL_TEXTURE_2D, imagePropagationTexture);
+			}
+			//glActiveTexture(GL_TEXTURE11);
+			//glBindTexture(GL_TEXTURE_2D, imagePropagationTexture);
+
+
+			//TODO: FINAL STEPS
+
+		}
 
 
 		
@@ -159,56 +208,6 @@ public:
 	
 	}
 	
-	private:
-
-	void analize() {	//go from higher level of detail to lower level of detail
-		//copy foreground into image E
-		//apply propagation shader to image E
-		downwardPropagationFbo->bindFrameBuffer();
-		imagePropagationShader->use();
-		imagePropagationShader->loadImageSource(10);
-		imagePropagationShader->loadMode(mode);
-		plane->draw2();
-		imagePropagationShader->unUse();
-		downwardPropagationFbo->unbindCurrentFrameBuffer();
-			
-
-		//generate mipmap levels for image 
-		glActiveTexture(GL_TEXTURE11);
-		glBindTexture(GL_TEXTURE_2D, imagePropagationTexture);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-	
-
-	}
-
-	void sintetize() {	//rebuild original level of detail from lower level of detail
-		
-		for (int level = levels - 1; level > 0; level--) {
-			//draw low level into next higher level
-			//upwardPropagationFbos[level-1]->bindFrameBuffer();
-			cubicInterpolationShader->use();
-			cubicInterpolationShader->loadImageSource(11);
-			cubicInterpolationShader->loadMipmapLevel(level);
-			plane->draw2();
-			cubicInterpolationShader->unUse();
-			/*upwardPropagationFbos[level-1]->unbindCurrentFrameBuffer();
-			glActiveTexture(GL_TEXTURE11);
-			glBindTexture(GL_TEXTURE_2D, outputTexture);*/
-		
-
-			//glCopyTexSubImage2D(GL_TEXTURE_2D, level-1, 0, 0, 0, 0, x, y);
-			//glTexImage2D(GL_TEXTURE_2D, level - 1, GL_RGBA, 1920, 1080, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-			//glActiveTexture(GL_TEXTURE11);
-			//glBindTexture(GL_TEXTURE_2D, imagePropagationTexture);
-		}
-		//glActiveTexture(GL_TEXTURE11);
-		//glBindTexture(GL_TEXTURE_2D, imagePropagationTexture);
-		
-
-		//TODO: FINAL STEPS
-	}
-
 
 
 };

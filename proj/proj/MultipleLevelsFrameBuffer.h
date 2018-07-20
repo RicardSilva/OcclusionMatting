@@ -10,22 +10,22 @@ public:
 
 	MultipleLevelsFrameBuffer(int width, int height) : FrameBuffer(width, height, 1) {
 		frameBuffer = createFrameBuffer();
-		colorTexture = createTextureAttachment(width, height);
-		depthTexture = createDepthTextureAttachment(width, height);
+		colorTexture = createTextureAttachment();
+		depthTexture = createDepthTextureAttachment();
 		unbindCurrentFrameBuffer();
 	
 	}
 
 	MultipleLevelsFrameBuffer(int width, int height, GLuint texture, int level) : texture(texture), level(level), FrameBuffer(width, height, 1) {
 		frameBuffer = createFrameBuffer();
-		colorTexture = createTextureAttachment(width, height, texture, level);
-		depthTexture = createDepthTextureAttachment(width, height);
+		colorTexture = createTextureAttachment(texture, level);
+		depthTexture = createDepthTextureAttachment();
 		unbindCurrentFrameBuffer();
 
 	}
 
 
-	int createTextureAttachment(int width, int height) {
+	int createTextureAttachment() {
 		GLuint texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -44,7 +44,7 @@ public:
 
 	}
 
-	int createTextureAttachment(int width, int height, GLuint texture, int level) {
+	int createTextureAttachment(GLuint texture, int level) {
 		/*	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);*/
 		glBindTexture(GL_TEXTURE_2D, texture);
