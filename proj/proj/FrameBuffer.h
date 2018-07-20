@@ -4,15 +4,17 @@
 #include "GL/freeglut.h"
 class FrameBuffer {
 protected:
-	int width;
-	int height;
-
+	
 	GLuint frameBuffer;
 	GLuint colorTexture;
 	GLuint depthTexture;
 
 
 public:
+
+	int width;
+	int height;
+
 	FrameBuffer(int width, int height) : width(width), height(height) {
 		frameBuffer = createFrameBuffer();
 		colorTexture = createTextureAttachment();

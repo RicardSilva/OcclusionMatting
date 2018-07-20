@@ -167,11 +167,31 @@ void GameManager::initShaders() {
 	unknownDilationShader->unUse();
 	ShaderManager::instance()->addShader("unknownDilation", unknownDilationShader);
 
+
 	Shader* imagePropagationShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/imagePropagation.frag");
 	imagePropagationShader->use();
 	imagePropagationShader->bindTextureUnits();
 	imagePropagationShader->unUse();
 	ShaderManager::instance()->addShader("imagePropagation", imagePropagationShader);
+
+	Shader* copyShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/copyShader.frag");
+	copyShader->use();
+	copyShader->bindTextureUnits();
+	copyShader->unUse();
+	ShaderManager::instance()->addShader("copy", copyShader);
+
+
+	Shader* preProcessShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/preProcess.frag");
+	preProcessShader->use();
+	preProcessShader->bindTextureUnits();
+	preProcessShader->unUse();
+	ShaderManager::instance()->addShader("preProcess", preProcessShader);
+
+	Shader* downSamplerShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/downSample.frag");
+	downSamplerShader->use();
+	downSamplerShader->bindTextureUnits();
+	downSamplerShader->unUse();
+	ShaderManager::instance()->addShader("pyramidBuilder", downSamplerShader);
 
 	Shader* piramidSmoothingShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/cubicInterpolation.frag");
 	piramidSmoothingShader->use();
@@ -185,11 +205,7 @@ void GameManager::initShaders() {
 	finalOutputShader->unUse();
 	ShaderManager::instance()->addShader("finalOutput", finalOutputShader);
 
-	Shader* copyShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/copyShader.frag");
-	copyShader->use();
-	copyShader->bindTextureUnits();
-	copyShader->unUse();
-	ShaderManager::instance()->addShader("copy", copyShader);
+	
 
 	Shader* debugShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/debugShader.frag");
 	debugShader->use();

@@ -6,25 +6,12 @@ in vec2 texC;
 layout(location = 0) out vec4 colorOut;
 
 
-uniform sampler2D virtualColor;
-uniform sampler2D virtualDepth;
-uniform sampler2D realColor;
-uniform sampler2D realDepth;
-uniform sampler2D realSmoothDepth;
-uniform sampler2D coarseTrimap;
-uniform sampler2D trimapEdge;
-uniform sampler2D realColorEdge;
-uniform sampler2D unknownLabels;
-uniform sampler2D finalTrimap;
-
 uniform sampler2D inputTexture;
-uniform int mipmapLevel;
 
-const float resX = 1920.0;
-const float resY = 1080.0;
+uniform float textureWidth;
+uniform float textureHeight;
 
-const float offsetX = 1.0 / resX;
-const float offsetY = 1.0 / resY;
+
 
 float BSpline(float x) {
 	float f = x;
@@ -44,9 +31,9 @@ float BSpline(float x) {
 	return 1.0;
 }  
 
-vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord, int mipmapLevel ) {
-    float texelSizeX = offsetX; //size of one texel 
-    float texelSizeY = offsetY; //size of one texel 
+vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord) {
+    float texelSizeX = 1.0 / textureWidth; //size of one texel 
+    float texelSizeY = 1.0 / textureHeight; //size of one texel 
     vec4 nSum = vec4( 0.0, 0.0, 0.0, 0.0 );
     vec4 nDenom = vec4( 0.0, 0.0, 0.0, 0.0 );
     float a = fract( TexCoord.x * resX ); // get the decimal part
@@ -55,10 +42,10 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord, int mipmapLevel ) {
     {
         for( int n =-1; n<= 2; n++)
         {
-			vec4 vecData = textureLod(textureSampler, TexCoord + vec2(texelSizeX * float( m ), texelSizeY * float( n )), mipmapLevel);
-			float f  = BSpline( float( m ) - a );
+			vec4 vecData = texture(textureSampler, TexCoord + vec2(texelSizeX * float( m ), texelSizeY * float( n )));
+			float f  = BSpline( float( m ) - a ) * vecData.a;
 			vec4 vecCooef1 = vec4( f,f,f,f );
-			float f1 = BSpline ( -( float( n ) - b ) );
+			float f1 = BSpline ( -( float( n ) - b ) ) * vecData.a;
 			vec4 vecCoeef2 = vec4( f1, f1, f1, f1 );
             nSum = nSum + ( vecData * vecCoeef2 * vecCooef1  );
             nDenom = nDenom + (( vecCoeef2 * vecCooef1 ));
@@ -70,5 +57,5 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord, int mipmapLevel ) {
 
 void main() {
 			
-	colorOut = BiCubic(inputTexture, texC, mipmapLevel);
+	colorOut = BiCubic(inputTexture, texC);
 }

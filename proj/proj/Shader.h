@@ -66,6 +66,9 @@ public:
 	virtual void loadMode(int mode) {}
 	virtual void loadMipmapLevel(int level) {}
 
+	virtual void loadTextureWidth(float width) {}
+	virtual void loadTextureHeight(float height) {}
+
 	void loadInt(GLint location, GLint i);
 	void loadFloat(GLint location, GLfloat f);
 	void loadBool(GLint location, bool b);

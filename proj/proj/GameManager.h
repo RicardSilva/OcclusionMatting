@@ -36,7 +36,7 @@
 #define CWIDTH 1920
 #define CHEIGHT 1080
 
-#define width 1920
+#define WIDTH	 1920
 #define HEIGHT 1080
 #define CAPTION "OcclusionMatting"
 

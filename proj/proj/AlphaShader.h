@@ -37,6 +37,9 @@ private:
 	GLint expandedForegroundID;
 	GLint expandedBackgroundID;
 
+	GLint textureWidthID;
+	GLint textureHeightID;
+
 	GLint debugTextureID;
 
 
@@ -71,6 +74,10 @@ public:
 		mipmapLevelID = getUniformLocation("mipmapLevel");
 		expandedForegroundID = getUniformLocation("expandedForeground");
 		expandedBackgroundID = getUniformLocation("expandedBackground");
+
+		textureWidthID = getUniformLocation("textureWidth");
+		textureHeightID = getUniformLocation("textureHeight");
+
 
 		debugTextureID = getUniformLocation("debugTexture");
 	}
@@ -109,9 +116,17 @@ public:
 	void loadMode(int mode) {
 		Shader::loadInt(modeID, mode);
 	}
-	virtual void loadMipmapLevel(int level) {
+	void loadMipmapLevel(int level) {
 		Shader::loadInt(mipmapLevelID, level);
 	}
+
+	void loadTextureWidth(float width) {
+		Shader::loadFloat(textureWidthID, width);
+	}
+	void loadTextureHeight(float height) {
+		Shader::loadFloat(textureHeightID, height);
+	}
+
 
 	void loadMatrices() {
 		computeDerivedMatrix(PROJ_VIEW_MODEL);
