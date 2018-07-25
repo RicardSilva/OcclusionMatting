@@ -10,14 +10,20 @@ uniform sampler2D inputTexture; // INPUT TEXTURE F
 uniform sampler2D inputTexture2; // INPUT TEXTURE S
 uniform int iteration;
 
-const float n = 0.5;
+const float n = 0.8;
 
 
 void main() {
 	
 	vec4 sampleF = texture(inputTexture, texC);
+	float aF = sampleF.a;
+	sampleF = sampleF / aF;
+	sampleF.a = aF;
 	vec4 sampleS = texture(inputTexture2, texC);
-	if(	sampleS.a > 0) {
+	float aS = sampleS.a;
+	sampleS = sampleS / aS;
+	sampleS.a = aS;
+	if(	sampleS.a > 0.9) {
 	
 		float w = sampleF.a / n;
 		
@@ -30,4 +36,5 @@ void main() {
 	else {
 		colorOut = sampleF;
 	}
+	
 }

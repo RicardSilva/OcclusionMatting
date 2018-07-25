@@ -61,8 +61,8 @@ void GameManager::init() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	realDepthTexture = texture2;
 
-	foregroundPyramid = new ImagePyramid(0,4,5);
-	backgroundPyramid = new ImagePyramid(1,4,5);
+	foregroundPyramid = new ImagePyramid(0,6,4);
+	backgroundPyramid = new ImagePyramid(1,5,5);
 
 }
 
@@ -295,7 +295,8 @@ void GameManager::display() {
 		fbo->unbindCurrentFrameBuffer();
 	}
 
-	glClearColor(0.9, 0.81, 0.92, 0);
+	glClearColor(0.53, 0.81, 0.92, 0);
+	glClearColor(0,0,0,0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	loadIdentity(MODEL);

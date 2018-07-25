@@ -13,7 +13,12 @@ uniform sampler2D inputTexture;
 void main() {
 			
 	
-	colorOut = texture(inputTexture, texC);
+	vec4 sample = texture(inputTexture, texC);
+	
+	colorOut = sample / sample.a;
+	colorOut.a = sample.a;
+	
+	//if(sample.a == 1) colorOut = vec4(1,0,0,1);
 	
 	
 }

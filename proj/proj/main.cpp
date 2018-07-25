@@ -104,6 +104,7 @@ int main(int argc, char **argv) {
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	glClearColor(0.53, 0.81, 0.92, 0);
 	gm = new GameManager();
 	gm->init();

@@ -15,7 +15,8 @@ void main() {
 		
 	vec4 sample = texture(inputTexture, texC);
 	if(	sample.a > 0) {
-		colorOut = vec4(sample.r, sample.g, sample.b, 1);
+		colorOut = sample / sample.a;
+		colorOut.a = 1;
 	}
 	else {
 		colorOut = vec4(sample.r, sample.g, sample.b, 0);
