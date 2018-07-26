@@ -8,6 +8,10 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+extern "C" {
+	_declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001; //to run in nvidia card
+}
+
 #define CAPTION "OcclusionMatting"
 int WindowHandle = 0;
 int WinX = 1920, WinY = 1080;
@@ -67,7 +71,7 @@ int main(int argc, char **argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA | GLUT_MULTISAMPLE);
 	
-	glutInitContextVersion(3,3);
+	glutInitContextVersion(4,2);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutInitContextFlags(GLUT_FORWARD_COMPATIBLE | GLUT_DEBUG);
 

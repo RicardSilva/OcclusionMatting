@@ -70,6 +70,9 @@ public:
 	virtual void loadTextureWidth(float width) {}
 	virtual void loadTextureHeight(float height) {}
 
+	virtual void loadOutputImage(GLint i) {}
+
+
 	void loadInt(GLint location, GLint i);
 	void loadFloat(GLint location, GLfloat f);
 	void loadBool(GLint location, bool b);

@@ -42,6 +42,7 @@ private:
 	GLint textureHeightID;
 
 	GLint debugTextureID;
+	GLint outputImageID;
 
 
 
@@ -80,6 +81,7 @@ public:
 		textureWidthID = getUniformLocation("textureWidth");
 		textureHeightID = getUniformLocation("textureHeight");
 
+		outputImageID = getUniformLocation("outputImage");
 
 		debugTextureID = getUniformLocation("debugTexture");
 	}
@@ -98,7 +100,13 @@ public:
 		Shader::loadInt(expandedBackgroundID, 15);
 
 		Shader::loadInt(debugTextureID, 10);
+		
 	}
+
+	void loadOutputImage(GLint i) {
+		Shader::loadInt(outputImageID, i);
+	}
+	
 
 	void loadVirtualColor(GLint id) {
 		Shader::loadInt(virtualColorID, id);

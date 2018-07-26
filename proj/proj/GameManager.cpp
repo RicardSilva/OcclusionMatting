@@ -288,15 +288,14 @@ void GameManager::update(double timeStep) {
 }
 void GameManager::display() {	
 	FrameCount++;
-	glClearColor(0.53, 0.81, 0.92, 0);
+	glClearColor(0.53, 0.81, 0.92, 1);
 	for (auto fbo : frameBuffers) {
 		fbo->bindFrameBuffer();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		fbo->unbindCurrentFrameBuffer();
 	}
 
-	glClearColor(0.53, 0.81, 0.92, 0);
-	glClearColor(0,0,0,0);
+	glClearColor(0.53, 0.81, 0.92, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	loadIdentity(MODEL);
@@ -384,7 +383,7 @@ void GameManager::display() {
 	glBindTexture(GL_TEXTURE_2D, finalTrimapTexture);
 
 	//TODO: image pyramid stuff
-	foregroundPyramid->expandImage();
+	//foregroundPyramid->expandImage();
 	backgroundPyramid->expandImage();
 
 	//finalOutputShader->use();

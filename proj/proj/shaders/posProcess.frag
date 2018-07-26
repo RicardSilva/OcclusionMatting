@@ -23,7 +23,7 @@ void main() {
 	float aS = sampleS.a;
 	sampleS = sampleS / aS;
 	sampleS.a = aS;
-	if(	sampleS.a > 0.9) {
+	if(	sampleS.a > 0) {
 	
 		float w = sampleF.a / n;
 		
