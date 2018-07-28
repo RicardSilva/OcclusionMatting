@@ -31,8 +31,8 @@ private:
 	GLint unknownLabelsID;
 	GLint finalTrimapID;
 
-	GLint imageInputSourceID;
-	GLint imageInputSource2ID;
+	GLint inputTextureSourceID;
+	GLint inputTextureSource2ID;
 	GLint iterationID;
 	GLint modeID;
 	GLint expandedForegroundID;
@@ -42,6 +42,7 @@ private:
 	GLint textureHeightID;
 
 	GLint debugTextureID;
+	GLint inputImageID;
 	GLint outputImageID;
 
 
@@ -71,8 +72,8 @@ public:
 		realColorEdgeID = getUniformLocation("realColorEdge");
 		unknownLabelsID = getUniformLocation("unknownLabels");
 		finalTrimapID = getUniformLocation("finalTrimap");
-		imageInputSourceID = getUniformLocation("inputTexture");
-		imageInputSource2ID = getUniformLocation("inputTexture2");
+		inputTextureSourceID = getUniformLocation("inputTexture");
+		inputTextureSource2ID = getUniformLocation("inputTexture2");
 		iterationID = getUniformLocation("iteration");
 		modeID = getUniformLocation("mode");
 		expandedForegroundID = getUniformLocation("expandedForeground");
@@ -81,6 +82,7 @@ public:
 		textureWidthID = getUniformLocation("textureWidth");
 		textureHeightID = getUniformLocation("textureHeight");
 
+		inputImageID = getUniformLocation("inputImage");
 		outputImageID = getUniformLocation("outputImage");
 
 		debugTextureID = getUniformLocation("debugTexture");
@@ -103,9 +105,7 @@ public:
 		
 	}
 
-	void loadOutputImage(GLint i) {
-		Shader::loadInt(outputImageID, i);
-	}
+
 	
 
 	void loadVirtualColor(GLint id) {
@@ -120,11 +120,21 @@ public:
 	void loadRealDepth(GLint id) {
 		Shader::loadInt(realDepthID, id);
 	}
-	void loadImageSource(int source) {
-		Shader::loadInt(imageInputSourceID, source);
+
+
+
+	void loadInputTexture(int source) {
+		Shader::loadInt(inputTextureSourceID, source);
 	}
-	void loadImageSource2(int source) {
-		Shader::loadInt(imageInputSource2ID, source);
+	void loadInputTexture2(int source) {
+		Shader::loadInt(inputTextureSource2ID, source);
+	}
+
+	void loadInputImage(GLint i) {
+		Shader::loadInt(inputImageID, i);
+	}
+	void loadOutputImage(GLint i) {
+		Shader::loadInt(outputImageID, i);
 	}
 
 	void loadIteration(int i) {
@@ -134,11 +144,11 @@ public:
 		Shader::loadInt(modeID, mode);
 	}
 
-	void loadTextureWidth(float width) {
-		Shader::loadFloat(textureWidthID, width);
+	void loadTextureWidth(int width) {
+		Shader::loadInt(textureWidthID, width);
 	}
-	void loadTextureHeight(float height) {
-		Shader::loadFloat(textureHeightID, height);
+	void loadTextureHeight(int height) {
+		Shader::loadInt(textureHeightID, height);
 	}
 
 

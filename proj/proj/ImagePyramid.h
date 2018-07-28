@@ -17,8 +17,7 @@
 //OUTPUT EXPANDEND BACKGROUND IN TEXTURE 12
 
 class ImagePyramid {
-
-
+	
 	int levels;
 	int iterations;
 
@@ -26,21 +25,16 @@ class ImagePyramid {
 				  // 1 -> background == virtual color
 	int outputImage;
 
-
-	std::vector<GLuint> multiLevelTextures;
-	std::vector<FrameBuffer*> multiLevelFbos;
-
-
 	GLuint textureF;
 	GLuint textureS;
+	std::vector<GLuint> multiLevelTextures;
+	std::vector<FrameBuffer*> multiLevelFbos;
 	GLuint finalTextureF;
 
 	GLuint preProcessedTextureS;
 	GLuint outputTexture;
 
 
-	FrameBuffer* inputCreationFbo;
-	FrameBuffer* textureCopyFbo;
 	FrameBuffer* finalFbo;
 
 	Shader* initializeShader;
@@ -71,33 +65,52 @@ public:
 
 
 		glGenTextures(1, &textureF);
-		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, textureF);
-
-		std::vector<GLfloat> image(4 * 1024*1024);
-		for (int j = 0; j<1024; ++j) {
-			for (int i = 0; i<1024; ++i) {
-				size_t index = j * 1024 + i;
-				image[4 * index + 0] = 1.0f;
-				image[4 * index + 1] = 0.0f;
-				image[4 * index + 2] = 0.0f;
-				image[4 * index + 3] = 1.0f;
-			}
-		}
-
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 1024, 1024,
 			0, GL_RGBA, GL_FLOAT, 0);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glBindImageTexture(1, textureF, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindImageTexture(0, textureF, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
 
-		textureCopyFbo = new FrameBuffer(1024, 1024);
-		textureS = textureCopyFbo->getColorTexture();
+		glGenTextures(1, &textureS);
+		glBindTexture(GL_TEXTURE_2D, textureS);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 1024, 1024,
+			0, GL_RGBA, GL_FLOAT, 0);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindImageTexture(1, textureS, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+		
 		finalFbo = new FrameBuffer(1024, 1024);
 		finalTextureF = finalFbo->getColorTexture();
 
+
+
+		////Image pyramid
+		//for (int i = 0; i < levels; i++) {
+		//	int div = pow(2, i);
+		//	int width = 1024 / div;
+		//	int height = 1024 / div;
+
+		//	GLuint texture;
+		//	glGenTextures(1, &texture);
+		//	glBindTexture(GL_TEXTURE_2D, texture);
+		//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height,
+		//		0, GL_RGBA, GL_FLOAT, 0);
+
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//	glBindTexture(GL_TEXTURE_2D, 0);
+		//	glBindImageTexture(2 + i, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+
+		//	multiLevelTextures.push_back(texture);	
+		//
+		//}
 
 
 		//Image pyramid
@@ -110,10 +123,11 @@ public:
 			GLuint texture = fbo->getColorTexture();
 
 			multiLevelFbos.push_back(fbo);
-			multiLevelTextures.push_back(texture);	
-		
+			multiLevelTextures.push_back(texture);
+
 		}
 
+		glBindImageTexture(2, multiLevelTextures[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 		
 		initializeShader = ShaderManager::instance()->getShader("imagePropagation");
 		copyShader = ShaderManager::instance()->getShader("copy");
@@ -135,162 +149,195 @@ public:
 
 		glClearColor(0, 0, 0, 0);
 
-		//clean framebuffers
-		textureCopyFbo->bindFrameBuffer();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		textureCopyFbo->unbindCurrentFrameBuffer();
-		finalFbo->bindFrameBuffer();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		finalFbo->unbindCurrentFrameBuffer();
-		
-		
 		for (auto fbo : multiLevelFbos) {
 			fbo->bindFrameBuffer();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			fbo->unbindCurrentFrameBuffer();
 		}
 
+		//clean framebuffers
+		finalFbo->bindFrameBuffer();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		finalFbo->unbindCurrentFrameBuffer();
+		
 		
 		//build foreground/background texture
 		glViewport(0,0,1024,1024);
 		initializeShader->use();
-		initializeShader->loadImageSource(0);
+		initializeShader->loadInputTexture(2);
 		initializeShader->loadMode(mode);
-		initializeShader->loadOutputImage(1);
+		initializeShader->loadOutputImage(0);
 		plane->draw2();
 		initializeShader->unUse();
-		glViewport(0, 0, 1920, 1080);
-
-		GLenum error = glGetError();
-		if (error != GL_NO_ERROR) {
-			std::cerr << error << std::endl;
-			
-		}
-
-
+		
+		//glViewport(0, 0, 1920, 1080);
+	
 		glActiveTexture(GL_TEXTURE10);
 		glBindTexture(GL_TEXTURE_2D, textureF);
+		
+	
+		for (int step = 0; step < iterations; step++) {
+			
+			// 5 TASKS
+
+			// 1 - COPY INPUT TO IMAGE S
+			copyShader->use();
+			copyShader->loadInputTexture(10);
+			copyShader->loadOutputImage(1);
+			plane->draw2();
+			copyShader->unUse();
+						
+			glActiveTexture(GL_TEXTURE10);
+			glBindTexture(GL_TEXTURE_2D, textureS);
+
+
+			//2 - PRE PROCESS IMAGE S
+			preProcessShader->use();
+			preProcessShader->loadInputTexture(10);
+			preProcessShader->loadOutputImage(2);
+			plane->draw2();
+			preProcessShader->unUse();
+
+			glActiveTexture(GL_TEXTURE10);
+			glBindTexture(GL_TEXTURE_2D, multiLevelTextures[0]);
+
+			
+		
+				
+			////3 - BUILD PYRAMID LEVELS 0 -> MAX LEVEL
+			//for (int i = 0; i < levels - 1; i++) {
+
+			//	int div = pow(2, i+1);
+			//	int width = 1024 / div;
+			//	int height = 1024 / div;
+			//	glActiveTexture(GL_TEXTURE10);
+			//	glBindTexture(GL_TEXTURE_2D, multiLevelTextures[i]);
+			//	pyramidBuilderShader->use();
+			//	pyramidBuilderShader->loadInputTexture(10);
+			//	pyramidBuilderShader->loadTextureWidth(width);
+			//	pyramidBuilderShader->loadTextureHeight(height);
+			//	pyramidBuilderShader->loadInputImage(2 + i);
+			//	pyramidBuilderShader->loadOutputImage(2 + i + 1);
+			//	plane->draw2();
+			//	pyramidBuilderShader->unUse();
+
+			//}
+			//glActiveTexture(GL_TEXTURE10);
+			//glBindTexture(GL_TEXTURE_2D, multiLevelTextures[1]);
+			
+			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			//3 - BUILD PYRAMID LEVELS 0 -> MAX LEVEL
+			for (int i = 0; i < levels - 1; i++) {
+
+				glActiveTexture(GL_TEXTURE10);
+				glBindTexture(GL_TEXTURE_2D, multiLevelTextures[i]);
+
+				FrameBuffer* fbo = multiLevelFbos[i + 1];
+				fbo->bindFrameBuffer();
+				pyramidBuilderShader->use();
+				pyramidBuilderShader->loadInputTexture(10);
+				pyramidBuilderShader->loadTextureWidth(fbo->width );
+				pyramidBuilderShader->loadTextureHeight(fbo->height );
+				plane->draw2();
+				pyramidBuilderShader->unUse();
+				fbo->unbindCurrentFrameBuffer();
+
+			}	
+			glViewport(0,0,1024,1024);
+
+			
+			
+			/*
+			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glActiveTexture(GL_TEXTURE10);
+			glBindTexture(GL_TEXTURE_2D, multiLevelTextures[0]);
+			pyramidBuilderShader->use();
+			pyramidBuilderShader->loadInputTexture(10);
+			pyramidBuilderShader->loadTextureWidth(1024);
+			pyramidBuilderShader->loadTextureHeight(1024);
+			plane->draw2();
+			pyramidBuilderShader->unUse();
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			*/
+			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			
+		
+
+			for (int i = 0; i < levels - 1; i++) {
+				FrameBuffer* fbo = multiLevelFbos[i];
+				fbo->bindFrameBuffer();
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				fbo->unbindCurrentFrameBuffer();
+			}
+				
+				
+				
+
+			//4 - SMOOTH PYRAMID LEVELS MAX LEVEL -> 0
+			for (int i = levels - 1; i > 0; i--) {
+
+				glActiveTexture(GL_TEXTURE10);
+				glBindTexture(GL_TEXTURE_2D, multiLevelTextures[i]);
+
+				FrameBuffer* fbo = multiLevelFbos[i - 1];
+				fbo->bindFrameBuffer();
+				pyramidSmoothingShader->use();
+				pyramidSmoothingShader->loadInputTexture(10);
+				pyramidSmoothingShader->loadTextureWidth(fbo->width);
+				pyramidSmoothingShader->loadTextureHeight(fbo->height);
+				plane->draw2();
+				pyramidSmoothingShader->unUse();
+				fbo->unbindCurrentFrameBuffer();
+
+			}
+			glViewport(0, 0, 1024, 1024);
+
+			
+
+			
+
+	
+			
+
+			glActiveTexture(GL_TEXTURE10);
+			glBindTexture(GL_TEXTURE_2D, textureF);
+			glActiveTexture(GL_TEXTURE11);
+			glBindTexture(GL_TEXTURE_2D, multiLevelTextures[0]);
+
+			
+			
+
+			//////5 - POS PROCESS IMAGE S
+			//finalFbo->bindFrameBuffer();
+			//posProcessShader->use();
+			//posProcessShader->loadInputTexture(10);
+			//posProcessShader->loadInputTexture2(11);
+			//posProcessShader->loadIteration(step);
+			//plane->draw2();
+			//posProcessShader->unUse();
+			//finalFbo->unbindCurrentFrameBuffer();
+
+			//glActiveTexture(GL_TEXTURE10);
+			//glBindTexture(GL_TEXTURE_2D, finalTextureF);
+
+		}
+		
+		glActiveTexture(GL_TEXTURE10);
+		glBindTexture(GL_TEXTURE_2D, multiLevelTextures[0]);
 
 		debugShader->use();
-		debugShader->loadImageSource(10);
+		debugShader->loadInputTexture(10);
 		debugShader->loadOutputImage(1);
 		plane->draw2();
 		debugShader->unUse();
+			
+		
 
+		glActiveTexture(GL_TEXTURE0 + outputImage);
+		glBindTexture(GL_TEXTURE_2D, finalTextureF);
 
-
-		//
-	
-		//for (int step = 0; step < iterations; step++) {
-		//
-		//	// 5 TASKS
-
-		//	// 1 - COPY INPUT TO IMAGE S
-		//	textureCopyFbo->bindFrameBuffer();
-		//	copyShader->use();
-		//	copyShader->loadImageSource(10);
-		//	plane->draw2();
-		//	copyShader->unUse();
-		//	textureCopyFbo->unbindCurrentFrameBuffer();
-		//				
-		//	glActiveTexture(GL_TEXTURE10);
-		//	glBindTexture(GL_TEXTURE_2D, textureS);
-		//	
-
-		//	//2 - PRE PROCESS IMAGE S
-		//	multiLevelFbos[0]->bindFrameBuffer();
-		//	preProcessShader->use();
-		//	preProcessShader->loadImageSource(10);
-		//	plane->draw2();
-		//	preProcessShader->unUse();
-		//	multiLevelFbos[0]->unbindCurrentFrameBuffer();
-
-		//		
-		//	//3 - BUILD PYRAMID LEVELS 0 -> MAX LEVEL
-		//	for (int i = 0; i < levels - 1; i++) {
-
-		//		glActiveTexture(GL_TEXTURE10);
-		//		glBindTexture(GL_TEXTURE_2D, multiLevelTextures[i]);
-
-		//		FrameBuffer* fbo = multiLevelFbos[i + 1];
-		//		fbo->bindFrameBuffer();
-		//		pyramidBuilderShader->use();
-		//		pyramidBuilderShader->loadImageSource(10);
-		//		pyramidBuilderShader->loadTextureWidth(fbo->width);
-		//		pyramidBuilderShader->loadTextureHeight(fbo->height);
-		//		plane->draw2();
-		//		pyramidBuilderShader->unUse();
-		//		fbo->unbindCurrentFrameBuffer();
-
-		//	}
-
-		//	
-		//	
-		//	
-
-		//	for (int i = 0; i < levels - 1; i++) {
-		//		FrameBuffer* fbo = multiLevelFbos[i];
-		//		fbo->bindFrameBuffer();
-		//		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//		fbo->unbindCurrentFrameBuffer();
-		//	}
-		//	
-		//	
-		//	
-
-		//	//4 - SMOOTH PYRAMID LEVELS MAX LEVEL -> 0
-		//	for (int i = levels - 1; i > 0; i--) {
-
-		//		glActiveTexture(GL_TEXTURE10);
-		//		glBindTexture(GL_TEXTURE_2D, multiLevelTextures[i]);
-
-		//		FrameBuffer* fbo = multiLevelFbos[i - 1];
-		//		fbo->bindFrameBuffer();
-		//		pyramidSmoothingShader->use();
-		//		pyramidSmoothingShader->loadImageSource(10);
-		//		pyramidSmoothingShader->loadTextureWidth((float)fbo->width);
-		//		pyramidSmoothingShader->loadTextureHeight((float)fbo->height);
-		//		plane->draw2();
-		//		pyramidSmoothingShader->unUse();
-		//		fbo->unbindCurrentFrameBuffer();
-
-		//	}
-
-		//	
-		//
-		//	
-		//	
-
-		//	glActiveTexture(GL_TEXTURE10);
-		//	glBindTexture(GL_TEXTURE_2D, textureF);
-		//	glActiveTexture(GL_TEXTURE11);
-		//	glBindTexture(GL_TEXTURE_2D, multiLevelTextures[0]);
-
-		//	
-		//	
-
-		//	////5 - POS PROCESS IMAGE S
-		//	finalFbo->bindFrameBuffer();
-		//	posProcessShader->use();
-		//	posProcessShader->loadImageSource(10);
-		//	posProcessShader->loadImageSource2(11);
-		//	posProcessShader->loadIteration(step);
-		//	plane->draw2();
-		//	posProcessShader->unUse();
-		//	finalFbo->unbindCurrentFrameBuffer();
-
-		//	glActiveTexture(GL_TEXTURE10);
-		//	glBindTexture(GL_TEXTURE_2D, finalTextureF);
-
-		//}
-		//
-		//	
-		//
-
-		//glActiveTexture(GL_TEXTURE0 + outputImage);
-		//glBindTexture(GL_TEXTURE_2D, finalTextureF);
-
-		//	
+			
 	
 	}
 	

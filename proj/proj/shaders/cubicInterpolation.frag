@@ -1,6 +1,5 @@
 #version 330
 
-
 in vec2 texC;
 
 layout(location = 0) out vec4 colorOut;
@@ -8,8 +7,8 @@ layout(location = 0) out vec4 colorOut;
 
 uniform sampler2D inputTexture;
 
-uniform float textureWidth;
-uniform float textureHeight;
+uniform int textureWidth;
+uniform int textureHeight;
 
 
 
@@ -44,8 +43,8 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord) {
         {
 			vec4 vecData = texture(textureSampler, TexCoord + vec2(texelSizeX * float( m ), texelSizeY * float( n )));
 			float f  = BSpline( float( m ) - a ) * vecData.a;
-			vec4 vecCooef1 = vec4( f,f,f,f );
-			float f1 = BSpline ( -( float( n ) - b ) ) * vecData.a;
+			vec4 vecCooef1 = vec4( f,f,f,f ) ;
+			float f1 = BSpline ( -( float( n ) - b ) * vecData.a) ;
 			vec4 vecCoeef2 = vec4( f1, f1, f1, f1 );
             nSum = nSum + ( vecData * vecCoeef2 * vecCooef1  );
             nDenom = nDenom + (( vecCoeef2 * vecCooef1 ));
@@ -54,9 +53,66 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord) {
     return nSum / nDenom;
 }
 
+vec4 cubic(float v){
+    vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
+    vec4 s = n * n * n;
+    float x = s.x;
+    float y = s.y - 4.0 * s.x;
+    float z = s.z - 4.0 * s.y + 6.0 * s.x;
+    float w = 6.0 - x - y - z;
+    return vec4(x, y, z, w) * (1.0/6.0);
+}
+
+vec4 cubic2(float x) // cubic_catmullrom(float x)
+{
+    const float s = 0.5; // potentially adjustable parameter
+    float x2 = x * x;
+    float x3 = x2 * x;
+    vec4 w;
+    w.x =    -s*x3 +     2*s*x2 - s*x + 0;
+    w.y = (2-s)*x3 +   (s-3)*x2       + 1;
+    w.z = (s-2)*x3 + (3-2*s)*x2 + s*x + 0;
+    w.w =     s*x3 -       s*x2       + 0;
+    return w;
+}
+
+vec4 BiCubic2(sampler2D sampler, vec2 texCoords){
+
+   vec2 texSize = textureSize(sampler, 0);
+   vec2 invTexSize = 1.0 / texSize;
+
+   texCoords = texCoords * texSize - 0.5;
+
+
+    vec2 fxy = fract(texCoords);
+    texCoords -= fxy;
+
+    vec4 xcubic = cubic2(fxy.x);
+    vec4 ycubic = cubic2(fxy.y);
+
+    vec4 c = texCoords.xxyy + vec2 (-0.5, +1.5).xyxy;
+
+    vec4 s = vec4(xcubic.xz + xcubic.yw, ycubic.xz + ycubic.yw);
+    vec4 offset = c + vec4 (xcubic.yw, ycubic.yw) / s;
+
+    offset *= invTexSize.xxyy;
+
+    vec4 sample0 = texture(sampler, offset.xz);
+    vec4 sample1 = texture(sampler, offset.yz);
+    vec4 sample2 = texture(sampler, offset.xw);
+    vec4 sample3 = texture(sampler, offset.yw);
+
+    float sx = s.x / (s.x + s.y);
+    float sy = s.z / (s.z + s.w);
+	
+	vec4 c1 = mix(sample3, sample2, sx);
+	vec4 c2 = mix(sample1, sample0, sx);
+
+    return mix( c1, c2, sy);
+}
+
 
 void main() {
-	colorOut = BiCubic(inputTexture, texC);
-
-	
+	colorOut = BiCubic(inputTexture, texC);	
+	colorOut = BiCubic2(inputTexture, texC);	
 }

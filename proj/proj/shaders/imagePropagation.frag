@@ -11,7 +11,6 @@ layout(location = 0) out vec4 colorOut;
 uniform sampler2D finalTrimap;
 
 uniform sampler2D inputTexture; // INPUT TEXTURE
-//uniform layout(binding=3, rgba16f) readonly uimage2D inputImage;
 uniform layout(rgba32f) writeonly image2D outputImage;
 
 
@@ -50,9 +49,8 @@ void main(void) {
 		
 	}
 	else {
-		color = vec4(255,0,0,255);
+		color = vec4(0,0,0,0);
 	}
-	color = texture(inputTexture, texC);
 	imageStore(outputImage, ivec2(gl_FragCoord.xy) , color);
 	discard;
 	

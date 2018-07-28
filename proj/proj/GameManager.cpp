@@ -289,13 +289,13 @@ void GameManager::update(double timeStep) {
 void GameManager::display() {	
 	FrameCount++;
 	glClearColor(0.53, 0.81, 0.92, 1);
+	glClearColor(0,0,0,0);
 	for (auto fbo : frameBuffers) {
 		fbo->bindFrameBuffer();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		fbo->unbindCurrentFrameBuffer();
 	}
 
-	glClearColor(0.53, 0.81, 0.92, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	loadIdentity(MODEL);
