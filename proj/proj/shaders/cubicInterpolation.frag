@@ -37,9 +37,9 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord) {
     vec4 nDenom = vec4( 0.0, 0.0, 0.0, 0.0 );
     float a = fract( TexCoord.x * textureWidth ); // get the decimal part
     float b = fract( TexCoord.y * textureHeight ); // get the decimal part
-    for( int m = -1; m <=2; m++ )
+    for( int m = -2; m <=2; m++ )
     {
-        for( int n =-1; n<= 2; n++)
+        for( int n =-2; n<= 2; n++)
         {
 			vec4 vecData = texture(textureSampler, TexCoord + vec2(texelSizeX * float( m ), texelSizeY * float( n )));
 			float f  = BSpline( float( m ) - a ) * vecData.a;
@@ -53,15 +53,7 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord) {
     return nSum / nDenom;
 }
 
-vec4 cubic(float v){
-    vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
-    vec4 s = n * n * n;
-    float x = s.x;
-    float y = s.y - 4.0 * s.x;
-    float z = s.z - 4.0 * s.y + 6.0 * s.x;
-    float w = 6.0 - x - y - z;
-    return vec4(x, y, z, w) * (1.0/6.0);
-}
+
 
 vec4 cubic2(float x) // cubic_catmullrom(float x)
 {
@@ -114,5 +106,5 @@ vec4 BiCubic2(sampler2D sampler, vec2 texCoords){
 
 void main() {
 	colorOut = BiCubic(inputTexture, texC);	
-	colorOut = BiCubic2(inputTexture, texC);	
+	//colorOut = BiCubic2(inputTexture, texC);	
 }

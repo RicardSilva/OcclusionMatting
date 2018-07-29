@@ -19,7 +19,7 @@ void main() {
 	
 	colorOut = c;
 	//if(colorOut.a < 1 && colorOut.a > 0) colorOut = vec4(1,0,0,1);
-	//if(colorOut.a == 1) colorOut = vec4(0,1,0,1);
+	//if(colorOut.a < 0.1) colorOut = vec4(0,1,0,1);
 	
 	
 }

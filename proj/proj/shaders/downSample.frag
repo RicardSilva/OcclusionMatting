@@ -11,56 +11,16 @@ uniform sampler2D inputTexture;
 
 uniform float textureWidth;
 uniform float textureHeight;
-
-
-vec4 gaussianBlur3x3() {
-	float offsetX = 1.0 / textureWidth;
-	float offsetY = 1.0 / textureHeight;
-	
-	vec4 thisColor = texture(inputTexture, texC);
-	vec4 result = vec4(0,0,0,0);
-	vec4 samples [9] = vec4[9](
-	texture(inputTexture, texC + vec2(-offsetX,offsetY)),
-	texture(inputTexture, texC + vec2(-offsetX,0)),
-	texture(inputTexture, texC + vec2(-offsetX,-offsetY)),
-	texture(inputTexture, texC + vec2(0,offsetY)),
-    thisColor,
-	texture(inputTexture, texC + vec2(0,-offsetY)),
-	texture(inputTexture, texC + vec2(offsetX,offsetY)),
-	texture(inputTexture, texC + vec2(offsetX,0)),
-	texture(inputTexture, texC + vec2(offsetX,-offsetY)));
-	
-	
-	float weights[9] = float[9] (
-		1,
-		2,
-		1,
-		2,
-		4,
-		2,
-		1,
-		2,
-		1);
-	
-	for(int i = 0; i < 9; i++) {
-		
-		
-		if(samples[i].a < 0.9) {
-			result += thisColor * weights[i] / 16.0;
-		}
-		else {
-			result += samples[i] * weights[i] / 16.0;
-		}
-		
-		
-	}	
-
-
-	if(result.a > 0) result.a = 1;
-	return result;
-	
-}
-
+ const float weights[9] = float[9] (
+		0.0625,
+		0.125,
+		0.0625,
+		0.125,
+		0.25,
+		0.125,
+		0.0625,
+		0.125,
+		0.0625);
 
 vec4 gaussianBlur5x5() {
 	
@@ -93,9 +53,9 @@ vec4 gaussianBlur5x5() {
 	
 }
 
-vec4 gaussianBlur3x32() {
-	float offsetX = 1.0 / textureWidth;
-	float offsetY = 1.0 / textureHeight;
+vec4 gaussianBlur3x3() {
+	float offsetX = textureWidth;
+	float offsetY = textureHeight;
 	
 	vec4 thisColor = texture(inputTexture, texC);
 	
@@ -111,24 +71,16 @@ vec4 gaussianBlur3x32() {
 	texture(inputTexture, texC + vec2(offsetX,-offsetY)));
 	
 	
-	float weights[9] = float[9] (
-		1/16.0,
-		2/16.0,
-		1/16.0,
-		2/16.0,
-		4/16.0,
-		2/16.0,
-		1/16.0,
-		2/16.0,
-		1/16.0);
+	
 	
 	vec4 result = vec4(0,0,0,0);
-    float finalAlpha = 0.0; // The actual end alpha
-
+    float finalAlpha = 0.0; 
+	vec4 fetchedColor;
+	float scaleWithAlpha;
     for(int i=0; i < 9; i++) {
-        vec4 fetchedColor = samples[i];
-        float scaleWithAlpha = fetchedColor.a * weights[i];
-        result += fetchedColor*scaleWithAlpha;
+        fetchedColor = samples[i];
+        scaleWithAlpha = fetchedColor.a * weights[i];
+        result += fetchedColor * scaleWithAlpha;
         finalAlpha += scaleWithAlpha;
 
     }
@@ -147,7 +99,7 @@ vec4 gaussianBlur3x32() {
 void main() {
 	
 		
-	colorOut = gaussianBlur3x32();
+	colorOut = gaussianBlur3x3();
 	
 	//colorOut = gaussianBlur5x5();
 	
