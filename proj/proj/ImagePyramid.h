@@ -199,7 +199,7 @@ public:
 		
 	
 		//for (int step = 0; step < iterations; step++) {
-			int step = 0;
+			int step = 1;
 			// 5 TASKS
 
 			// 1 - COPY INPUT TO IMAGE S 
@@ -294,6 +294,8 @@ public:
 			posProcessShader->loadInputTexture2(11);
 			posProcessShader->loadOutputImage(3);
 			posProcessShader->loadIteration(step);
+			posProcessShader->loadTextureWidth(1024);
+			posProcessShader->loadTextureHeight(1024);
 			plane->draw2();
 			posProcessShader->unUse();
 			//finalFbo->unbindCurrentFrameBuffer();
