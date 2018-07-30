@@ -44,6 +44,7 @@ private:
 	GLint debugTextureID;
 	GLint inputImageID;
 	GLint outputImageID;
+	GLint outputImage2ID;
 
 
 
@@ -84,6 +85,7 @@ public:
 
 		inputImageID = getUniformLocation("inputImage");
 		outputImageID = getUniformLocation("outputImage");
+		outputImage2ID = getUniformLocation("outputImage2");
 
 		debugTextureID = getUniformLocation("debugTexture");
 	}
@@ -136,6 +138,10 @@ public:
 	void loadOutputImage(GLint i) {
 		Shader::loadInt(outputImageID, i);
 	}
+	void loadOutputImage2(GLint i) {
+		Shader::loadInt(outputImage2ID, i);
+	}
+
 
 	void loadIteration(int i) {
 		Shader::loadInt(iterationID, i);

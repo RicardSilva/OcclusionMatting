@@ -74,7 +74,7 @@ public:
 
 	virtual void loadInputImage(GLint i) {}
 	virtual void loadOutputImage(GLint i) {}
-
+	virtual void loadOutputImage2(GLint i) {}
 
 	void loadInt(GLint location, GLint i);
 	void loadFloat(GLint location, GLfloat f);

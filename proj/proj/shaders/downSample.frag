@@ -2,6 +2,7 @@
 
 
 in vec2 texC;
+in vec2 texCs[9];
 
 layout(location = 0) out vec4 colorOut;
 
@@ -9,8 +10,8 @@ layout(location = 0) out vec4 colorOut;
 
 uniform sampler2D inputTexture;
 
-uniform float textureWidth;
-uniform float textureHeight;
+uniform int textureWidth;
+uniform int textureHeight;
  const float weights[9] = float[9] (
 		0.0625,
 		0.125,

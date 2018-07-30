@@ -21,6 +21,7 @@ void main() {
 		
 	}
 		
-	imageStore(outputImage, ivec2(gl_FragCoord.xy) , color);
-	discard;
+	//imageStore(outputImage, ivec2(gl_FragCoord.xy) , color);
+	//discard;
+	colorOut = color;
 }
