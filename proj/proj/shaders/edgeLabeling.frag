@@ -27,76 +27,25 @@ const float offsetY = 1.0 / resY;
 
 
 vec4 labelUnknown(vec4 trimapColor, vec2 coords) {
-	
-	vec2 offsets[25] = vec2[25](vec2(-2 * offsetX, -2 * offsetY),
-						vec2(-2 * offsetX, -1 * offsetY),
-						vec2(-2 * offsetX, 0 * offsetY),
-						vec2(-2 * offsetX, 1 * offsetY),
-						vec2(-2 * offsetX, 2 * offsetY),
-						vec2(-1 * offsetX, -2 * offsetY),
-						vec2(-1 * offsetX, -1 * offsetY),
-						vec2(-1 * offsetX, 0 * offsetY),
-						vec2(-1 * offsetX, 1 * offsetY),
-						vec2(-1 * offsetX, 2 * offsetY),
-						vec2(0 * offsetX, -2 * offsetY),
-						vec2(0 * offsetX, -1 * offsetY),
-						vec2(0 * offsetX, 0 * offsetY),
-						vec2(0 * offsetX, 1 * offsetY),
-						vec2(0 * offsetX, 2 * offsetY),
-						vec2(1 * offsetX, -2 * offsetY),
-						vec2(1 * offsetX, -1 * offsetY),
-						vec2(1 * offsetX, 0 * offsetY),
-						vec2(1 * offsetX, 1 * offsetY),
-						vec2(1 * offsetX, 2 * offsetY),
-						vec2(2 * offsetX, -2 * offsetY),
-						vec2(2 * offsetX, -1 * offsetY),
-						vec2(2 * offsetX, 0 * offsetY),
-						vec2(2 * offsetX, 1 * offsetY),
-						vec2(2 * offsetX, 2 * offsetY));
-						
-	vec2 directions[25] = vec2[25] (vec2(-2,-2),
-									vec2(-2,-1),
-									vec2(-2,0),
-									vec2(-2,1),
-									vec2(-2,2),
-									vec2(-1,-2),
-									vec2(-1,-1),
-									vec2(-1,0),
-									vec2(-1,1),
-									vec2(-1,2),
-									vec2(0,-2),
-									vec2(0,-1),
-									vec2(0,0),
-									vec2(0,1),
-									vec2(0,2),
-									vec2(1,-2),
-									vec2(1,-1),
-									vec2(1,0),
-									vec2(1,1),
-									vec2(1,2),
-									vec2(2,-2),
-									vec2(2,-1),
-									vec2(2,0),
-									vec2(2,1),
-									vec2(2,2));
-									
+										
 	int edgePointsCounter = 0;
 	int backHalfCounter = 0;
 	int frontHalfCounter = 0;
 
-	for(int i = 0; i < 25; i++) {
-		vec4 color = texture(realColorEdge, coords + offsets[i]);
-		if(color.a < 1) {
-			edgePointsCounter++;
-			vec2 unknownPixelDirection = vec2((trimapColor.r * 2) - 1, (trimapColor.g * 2) - 1);
-			if(dot(unknownPixelDirection, offsets[i]) >= 0) {
-				backHalfCounter++;
-				
+	for(int i = -4; i <= 4; i++) {
+		for(int j = -4; j <= 4; j++) {
+			vec4 color = texture(realColorEdge, coords + vec2(i*offsetX,j*offsetY));
+			if(color.a < 1) {
+				edgePointsCounter++;
+				vec2 unknownPixelDirection = vec2((trimapColor.r * 2) - 1, (trimapColor.g * 2) - 1);
+				if(dot(unknownPixelDirection, vec2(i*offsetX,j*offsetY)) >= 0) {
+					backHalfCounter++;
+					
+				}
+				else {
+					frontHalfCounter++;
+				}
 			}
-			else {
-				frontHalfCounter++;
-			}
-			
 		}
 	}
 	

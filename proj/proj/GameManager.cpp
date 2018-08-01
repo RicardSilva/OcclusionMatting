@@ -61,8 +61,8 @@ void GameManager::init() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	realDepthTexture = texture2;
 
-	foregroundPyramid = new ImagePyramid(0,6,1);
-	backgroundPyramid = new ImagePyramid(1,6,1);
+	foregroundPyramid = new ImagePyramid(0,5,5);
+	backgroundPyramid = new ImagePyramid(1,4,5);
 
 }
 
@@ -288,8 +288,7 @@ void GameManager::update(double timeStep) {
 }
 void GameManager::display() {	
 	FrameCount++;
-	glClearColor(0.53, 0.81, 0.92, 1);
-	glClearColor(0,0,0,0);
+	glClearColor(1,1,1,0);
 	for (auto fbo : frameBuffers) {
 		fbo->bindFrameBuffer();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -386,16 +385,12 @@ void GameManager::display() {
 	foregroundPyramid->expandImage();
 	backgroundPyramid->expandImage();
 
-	//finalOutputShader->use();
-	//plane->draw2();
-	//finalOutputShader->unUse();
+	finalOutputShader->use();
+	plane->draw2();
+	finalOutputShader->unUse();
 
 
-
-		debugShader->use();
-		debugShader->loadInputTexture(14);
-		plane->draw2();
-		debugShader->unUse();
+	
 	
 
 	glutSwapBuffers();

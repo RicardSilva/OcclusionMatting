@@ -89,6 +89,11 @@ public:
 			FrameBuffer* fbo = new FrameBuffer(width, height);
 			GLuint texture = fbo->getColorTexture();
 
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
 			multiLevelFbos.push_back(fbo);
 			multiLevelTextures.push_back(texture);
 
@@ -102,8 +107,8 @@ public:
 			0, GL_RGBA, GL_FLOAT, 0);
 
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindImageTexture(2, finalTextureF, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
@@ -114,8 +119,8 @@ public:
 
 
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindImageTexture(3, propagationCosts, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32UI);
 		
@@ -149,7 +154,9 @@ public:
 	}
 
 	void expandImage() {
+		glClearColor(0, 0, 0, 0);
 
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		initialFbo->bindFrameBuffer();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		initialFbo->unbindCurrentFrameBuffer();
@@ -169,15 +176,17 @@ public:
 		plane->draw2();
 		initializeShader->unUse();
 		initialFbo->unbindCurrentFrameBuffer();
-		
+		glViewport(0, 0, 1024, 1024);
+	
+	
+
 	
 		glActiveTexture(GL_TEXTURE10);
 		glBindTexture(GL_TEXTURE_2D, textureF);
 		
 	
 		for (int step = 0; step < iterations; step++) {
-
-			glClearColor(0, 0, 0, 0);
+			//int step = 0;
 
 			for (auto fbo : multiLevelFbos) {
 				fbo->bindFrameBuffer();
@@ -197,9 +206,10 @@ public:
 			plane->draw2();
 			copyShader->unUse();
 			multiLevelFbos[0]->unbindCurrentFrameBuffer();
-	
-						
-			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+			glViewport(0, 0, 1024, 1024);			
+
+
 			pyramidBuilderShader->use();
 			FrameBuffer* fbo;
 			//3 - BUILD PYRAMID LEVELS 0 -> MAX LEVEL
@@ -209,9 +219,9 @@ public:
 				glBindTexture(GL_TEXTURE_2D, multiLevelTextures[i]);
 
 				fbo = multiLevelFbos[i + 1];
-				fbo->bindFrameBuffer();				
-				pyramidBuilderShader->loadTextureWidth(fbo->width );
-				pyramidBuilderShader->loadTextureHeight(fbo->height );
+				fbo->bindFrameBuffer();		
+				pyramidBuilderShader->loadTextureWidth(fbo->width);
+				pyramidBuilderShader->loadTextureHeight(fbo->height);
 				plane->draw2();
 			
 				fbo->unbindCurrentFrameBuffer();
@@ -220,7 +230,8 @@ public:
 			pyramidBuilderShader->unUse();
 
 			
-		
+			
+
 			for (int i = 0; i < levels - 1; i++) {
 				fbo = multiLevelFbos[i];
 				fbo->bindFrameBuffer();
@@ -229,7 +240,6 @@ public:
 			}
 				
 			glViewport(0, 0, 1024, 1024);
-				
 			//4 - SMOOTH PYRAMID LEVELS MAX LEVEL -> 0
 			pyramidSmoothingShader->use();
 			for (int i = levels - 1; i > 0; i--) {
@@ -245,18 +255,20 @@ public:
 				fbo->unbindCurrentFrameBuffer();
 
 			}
-
-			pyramidSmoothingShader->unUse();
+		
+		
 			glViewport(0, 0, 1024, 1024);
 			
+		
 			
-
 			glActiveTexture(GL_TEXTURE10);
 			glBindTexture(GL_TEXTURE_2D, textureF);
 			glActiveTexture(GL_TEXTURE11);
 			glBindTexture(GL_TEXTURE_2D, multiLevelTextures[0]);
 
-	
+			
+
+			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			//////5 - POS PROCESS IMAGE S
 			posProcessShader->use();
 			posProcessShader->loadInputTexture(10);
@@ -273,16 +285,29 @@ public:
 			glActiveTexture(GL_TEXTURE10);
 			glBindTexture(GL_TEXTURE_2D, finalTextureF);
 
+			
+
 		}
 
 		
-
-
+	/*	glActiveTexture(GL_TEXTURE10);
+		glBindTexture(GL_TEXTURE_2D, finalTextureF);
+		glViewport(0, 0, 1024, 1024);
+		debugShader->use();
+		debugShader->loadInputTexture(10);
+		plane->draw2();
+		debugShader->unUse();*/
+			
+		
 		glActiveTexture(GL_TEXTURE0 + outputImage);
 		glBindTexture(GL_TEXTURE_2D, finalTextureF);
+
+		glActiveTexture(GL_TEXTURE0 + outputImage + 2);
+		glBindTexture(GL_TEXTURE_2D, propagationCosts);		
+
 	
 		glViewport(0, 0, 1920, 1080);
-		
+
 	}
 	
 

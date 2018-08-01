@@ -5,7 +5,7 @@ void GameObject::draw(){
 
 	pushMatrix(MODEL);	
 	translate(MODEL, position);
-	scale(MODEL, 2, 2, 2);
+	scale(MODEL, 3, 3, 3);
 	shader->loadMatrices();
 
 	for (auto mesh : model->meshes) {

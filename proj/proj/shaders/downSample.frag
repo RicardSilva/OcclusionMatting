@@ -55,8 +55,8 @@ vec4 gaussianBlur5x5() {
 }
 
 vec4 gaussianBlur3x3() {
-	float offsetX = textureWidth;
-	float offsetY = textureHeight;
+	float offsetX = 1 / textureWidth ;
+	float offsetY = 1 / textureHeight ;
 	
 	vec4 thisColor = texture(inputTexture, texC);
 	
@@ -90,18 +90,41 @@ vec4 gaussianBlur3x3() {
         discard;
     else
     {
-        result /= finalAlpha;
+        result.xyz /= finalAlpha;
 		result.a = finalAlpha;
 		
     }
 	return result;
 }
 
+vec4 gaussianBlur2x2() {
+	float n = 4;
+	
+	float offsetX = 1 / (textureWidth * n) ;
+	float offsetY = 1 / (textureHeight * n) ;
+	
+    vec4 p0q0 = texture2D(inputTexture, texC);
+    vec4 p1q0 = texture2D(inputTexture, texC + vec2(offsetX, 0));
+
+    vec4 p0q1 = texture2D(inputTexture, texC + vec2(0, offsetY));
+    vec4 p1q1 = texture2D(inputTexture, texC + vec2(offsetX , offsetY));
+
+    float a = fract( texC.x * (textureWidth * n)); // Get Interpolation factor for X direction.
+					// Fraction near to valid data.
+
+    vec4 pInterp_q0 = mix( p0q0, p1q0, a ); // Interpolates top row in X direction.
+    vec4 pInterp_q1 = mix( p0q1, p1q1, a ); // Interpolates bottom row in X direction.
+
+    float b = fract( texC.y * (textureHeight * n));// Get Interpolation factor for Y direction.
+    return mix( pInterp_q0, pInterp_q1, b ); // Interpolate in Y direction.
+
+}
+
+
 void main() {
 	
 		
 	colorOut = gaussianBlur3x3();
-	
-	//colorOut = gaussianBlur5x5();
+	colorOut = texture(inputTexture, texC);
 	
 }

@@ -7,13 +7,17 @@ layout(location = 0) out vec4 colorOut;
 
 
 uniform sampler2D virtualColor;
-uniform sampler2D virtualDepth;
 uniform sampler2D realColor;
-uniform sampler2D realDepth;
-uniform sampler2D realSmoothDepth;
 uniform sampler2D finalTrimap;
 uniform sampler2D expandedForeground;
 uniform sampler2D expandedBackground;
+uniform sampler2D propagationCostsForeground;
+uniform sampler2D propagationCostsBackground;
+
+uniform sampler2D trimapEdge;
+uniform sampler2D realColorEdge;
+
+uniform sampler2D unknownLabels;
 
 const float zNear = 0.1;
 const float zFar = 8000.0;
@@ -25,11 +29,22 @@ const float resY = 1080.0;
 const float offsetX = 1.0 / resX;
 const float offsetY = 1.0 / resY;
 
-/*
+const vec2 offsets[9] = vec2[9] (
+		vec2(-offsetX,offsetY),
+		vec2(-offsetX,0),
+		vec2(-offsetX,-offsetY),
+		vec2(0,offsetY),
+		vec2(0,0),
+		vec2(0,-offsetY),
+		vec2(offsetX,offsetY),
+		vec2(offsetX,0),
+		vec2(offsetX,-offsetY));
+		
+
 float alphaEstimation(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelColor) {
 	float l = length(foregroundColor - backgroundColor);
-	return((pixelColor - backgroundColor) 
-			* (foregroundColor - backgroundColor)) 
+	return dot((pixelColor - backgroundColor), 
+			 (foregroundColor - backgroundColor))
 			/ (l * l);
 }
 
@@ -43,16 +58,17 @@ float colorCost(vec4 foregroundColor, vec4 backgroundColor,
 			+ (1-alpha) * backgroundColor));
 }
 
-float propagationCost(vec4 foregroundColor, vec4 backgroundColor) {
-	float dm = 10.0; //FIX ME
-	return (d(foregroundColor) + d(backgroundColor)) / 2.0f * dm;
+float propagationCost(vec4 foregroundColor, vec4 backgroundColorn, int i) {
+	float dm = 4.0; //FIX ME
+	return (texture(propagationCostsForeground, texC + offsets[i]).r 
+	+ texture(propagationCostsBackground, texC + offsets[i]).r ) / 2.0f * dm;
 }
 
-float objectiveFunction(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelColor) {
+float objectiveFunction(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelColor, int i) {
 	//find min of sum of color cost with propagation cost around the pixel
 	float weight = 0.5f;
 	return weight * colorCost(foregroundColor, backgroundColor, pixelColor) 
-		+ propagationCost(foregroundColor, backgroundColor);
+		+   propagationCost(foregroundColor, backgroundColor, i);
 	
 	
 }
@@ -60,37 +76,37 @@ float objectiveFunction(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelCo
 
 float computeAlpha() {
 	//find best sample pair among neighbors using objectiveFunction
-	vec4 pixelColor = vec4(0,0,0,0); //FIX ME: WHAT IS Ip SUPPOSED TO BE?
+	vec4 pixelColor = texture(realColor, texC);
 	
 	
 	vec4 foregroundSamples [9] = vec4[9](
-		texture(expandedForeground, texC + vec2(-offsetX,offsetY)),
-		texture(expandedForeground, texC + vec2(-offsetX,0)),
-		texture(expandedForeground, texC + vec2(-offsetX,-offsetY)),
-		texture(expandedForeground, texC + vec2(0,offsetY)),
+		texture(expandedForeground, texC + offsets[0]),
+		texture(expandedForeground, texC + offsets[1]),
+		texture(expandedForeground, texC + offsets[2]),
+		texture(expandedForeground, texC + offsets[3]),
 		texture(expandedForeground, texC),
-		texture(expandedForeground, texC + vec2(0,-offsetY)),
-		texture(expandedForeground, texC + vec2(offsetX,offsetY)),
-		texture(expandedForeground, texC + vec2(offsetX,0)),
-		texture(expandedForeground, texC + vec2(offsetX,-offsetY)));
+		texture(expandedForeground, texC + offsets[5]),
+		texture(expandedForeground, texC + offsets[6]),
+		texture(expandedForeground, texC + offsets[7]),
+		texture(expandedForeground, texC + offsets[8]));
 		
 	vec4 backgroundSamples [9] = vec4[9](
-		texture(expandedBackground, texC + vec2(-offsetX,offsetY)),
-		texture(expandedBackground, texC + vec2(-offsetX,0)),
-		texture(expandedBackground, texC + vec2(-offsetX,-offsetY)),
-		texture(expandedBackground, texC + vec2(0,offsetY)),
+		texture(expandedBackground, texC + offsets[0]),
+		texture(expandedBackground, texC + offsets[1]),
+		texture(expandedBackground, texC + offsets[2]),
+		texture(expandedBackground, texC + offsets[3]),
 		texture(expandedBackground, texC),
-		texture(expandedBackground, texC + vec2(0,-offsetY)),
-		texture(expandedBackground, texC + vec2(offsetX,offsetY)),
-		texture(expandedBackground, texC + vec2(offsetX,0)),
-		texture(expandedBackground, texC + vec2(offsetX,-offsetY)));
+		texture(expandedBackground, texC + offsets[5]),
+		texture(expandedBackground, texC + offsets[6]),
+		texture(expandedBackground, texC + offsets[7]),
+		texture(expandedBackground, texC + offsets[8]));
 	
 	float minimumCost = -10000;
 	float cost = 0;
 	int minimumSampleIndex = 0;
 	
 	for(int i = 0; i < 9; i++) {
-		cost = objectiveFunction(foregroundSamples[i], backgroundSamples[i], pixelColor);
+		cost = objectiveFunction(foregroundSamples[i], backgroundSamples[i], pixelColor, i);
 		if(cost < minimumCost) {
 			minimumCost = cost;
 			minimumSampleIndex = i;
@@ -105,10 +121,12 @@ float computeAlpha() {
 }
 
 
-*/
+
 
 void main() {
-	/*	
+	
+	float alpha = 0;
+	
 	vec4 trimapColor = texture(finalTrimap, texC);
 	if(trimapColor == vec4(1,0,0,1)) {//RED -> REAL COLOR
 		colorOut = texture(realColor, texC);
@@ -118,13 +136,17 @@ void main() {
 	}
 	else if (trimapColor == vec4(0,0,0,1)){ //BLACK -> VIRTUAL COLOR
 		colorOut = texture(virtualColor, texC);
+		alpha = 1;
 	}
 	else if (trimapColor.a < 1) {	//UNKNOWN -> compute best color
-		float alpha = computeAlpha();
+		alpha = computeAlpha();
 		colorOut = alpha * texture(realColor, texC) + (1 - alpha) * texture(virtualColor, texC);
+		//colorOut = vec4(0,1,0,1);
 	}
-	*/
-	colorOut = texture(expandedForeground, texC);
+	
+	//colorOut = vec4(alpha, alpha,alpha, 1);
+	//colorOut = texture(finalTrimap, texC);
+	//colorOut = texture(expandedBackground, texC);
 	
 }
 

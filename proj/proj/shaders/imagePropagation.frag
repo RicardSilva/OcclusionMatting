@@ -22,7 +22,7 @@ uniform int mode; //0 -> foreground
 
 void main(void) {
 	vec4 color;
-	/*vec4 trimapColor = texture(finalTrimap, texC);
+	vec4 trimapColor = texture(finalTrimap, texC);
 	if(mode == 0) {
 		if(trimapColor == vec4(1,1,1,1)) { //WHITE ->	FOREGROUND
 			color = texture(inputTexture, texC);
@@ -38,19 +38,19 @@ void main(void) {
 			color.a = 0.8f;
 		}
 		else {
-			color = vec4(0,0,0,1);
+			color = vec4(0,0,0,0);
 		}
 			
-	}*/
+	}
 	
-	if((0.5-texC.s) * (0.5-texC.s)  + (0.5-texC.t) * (0.5-texC.t)  <= 0.025) {
+	/*if((0.5-texC.s) * (0.5-texC.s)  + (0.5-texC.t) * (0.5-texC.t)  <= 0.025) {
 		color = vec4(texC.s, texC.t, 0, 1);
 		color.a = 0.8f;
 		
 	}
 	else {
 		color = vec4(0,0,0,0);
-	}
+	}*/
 	//imageStore(outputImage, ivec2(gl_FragCoord.xy) , color);
 	//discard;
 	colorOut = color;
