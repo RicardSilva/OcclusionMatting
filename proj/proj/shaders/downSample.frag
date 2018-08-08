@@ -97,34 +97,44 @@ vec4 gaussianBlur3x3() {
 	return result;
 }
 
-vec4 gaussianBlur2x2() {
-	float n = 4;
+vec4 gaussianBlur3x32() {
+	float offsetX = 1.0 / textureWidth ;
+	float offsetY = 1.0 / textureHeight ;	
 	
-	float offsetX = 1 / (textureWidth * n) ;
-	float offsetY = 1 / (textureHeight * n) ;
 	
-    vec4 p0q0 = texture2D(inputTexture, texC);
-    vec4 p1q0 = texture2D(inputTexture, texC + vec2(offsetX, 0));
+	vec4 result = vec4(0,0,0,0);
+    float finalAlpha = 0.0; 
+	vec4 fetchedColor;
+	float scaleWithAlpha;
+	for (int i = -1 ; i <= 1; i++) {
+		for(int j = -1; j <= 1; j++) {
+			fetchedColor = texture(inputTexture, texC + vec2(i - 0.001 / textureWidth, j - 0.001  /textureHeight));
+			scaleWithAlpha = fetchedColor.a  * 1.0/9.0;
+			result += fetchedColor * scaleWithAlpha;
+			finalAlpha += scaleWithAlpha;
+			
+		}
+	}
 
-    vec4 p0q1 = texture2D(inputTexture, texC + vec2(0, offsetY));
-    vec4 p1q1 = texture2D(inputTexture, texC + vec2(offsetX , offsetY));
-
-    float a = fract( texC.x * (textureWidth * n)); // Get Interpolation factor for X direction.
-					// Fraction near to valid data.
-
-    vec4 pInterp_q0 = mix( p0q0, p1q0, a ); // Interpolates top row in X direction.
-    vec4 pInterp_q1 = mix( p0q1, p1q1, a ); // Interpolates bottom row in X direction.
-
-    float b = fract( texC.y * (textureHeight * n));// Get Interpolation factor for Y direction.
-    return mix( pInterp_q0, pInterp_q1, b ); // Interpolate in Y direction.
-
+    if (finalAlpha <= 0.0)
+        discard;
+    else
+    {
+        result.xyz /= finalAlpha;
+		result.a = finalAlpha;
+		
+    }
+	return result;
 }
 
 
 void main() {
 	
 		
-	colorOut = gaussianBlur3x3();
-	colorOut = texture(inputTexture, texC);
+	//colorOut = gaussianBlur3x3();
+	vec2 t = vec2(texC.s - 0.001/textureWidth, texC.t - 0.001/textureHeight);
+	colorOut = texture(inputTexture, t);
+	//colorOut = texture(inputTexture, texC);
+	//colorOut = gaussianBlur3x32();
 	
 }

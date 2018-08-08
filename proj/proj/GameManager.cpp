@@ -62,7 +62,7 @@ void GameManager::init() {
 	realDepthTexture = texture2;
 
 	foregroundPyramid = new ImagePyramid(0,5,5);
-	backgroundPyramid = new ImagePyramid(1,4,5);
+	backgroundPyramid = new ImagePyramid(1,5,5);
 
 }
 
@@ -383,13 +383,17 @@ void GameManager::display() {
 
 	//TODO: image pyramid stuff
 	foregroundPyramid->expandImage();
-	backgroundPyramid->expandImage();
+	//backgroundPyramid->expandImage();
 
 	finalOutputShader->use();
-	plane->draw2();
+	//plane->draw2();
 	finalOutputShader->unUse();
 
-
+	glViewport(0, 0, 1024, 1024);
+	debugShader->use();
+	debugShader->loadInputTexture(14);
+	plane->draw2();
+	debugShader->unUse();
 	
 	
 

@@ -45,9 +45,9 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord )
 			vec4 vecData = texture2D(inputTexture, 
                                TexCoord + vec2(texelSizeX * float( m ), 
 					texelSizeY * float( n )));
-			float f  = BSpline( float( m ) - a ) * vecData.a;
+			float f  = BSpline( float( m ) ) * vecData.a;
 			vec4 vecCooef1 = vec4( f,f,f,f );
-			float f1 = BSpline ( -( float( n ) - b ) ) * vecData.a;
+			float f1 = BSpline ( -( float( n )  ) ) * vecData.a;
 			vec4 vecCoeef2 = vec4( f1, f1, f1, f1 );
             nSum = nSum + ( vecData * vecCoeef2 * vecCooef1  );
             nDenom = nDenom + (( vecCoeef2 * vecCooef1 ));
@@ -59,5 +59,5 @@ vec4 BiCubic( sampler2D textureSampler, vec2 TexCoord )
 
 
 void main() {
-	colorOut = BiCubic(inputTexture, texC);		
+	colorOut = BiCubic(inputTexture, texC);	
 }

@@ -13,7 +13,7 @@ uniform layout(rgba32f) writeonly image2D outputImage;
 uniform layout(size1x32) writeonly uimage2D outputImage2;
 uniform int iteration;
 
-const float n = 0.8f;
+const float n = 1;
 
 
 void main() {
@@ -29,7 +29,6 @@ void main() {
 		}
 	
 		float w = sampleF.a / n;
-		if(sampleF.a == 0) w = 0;
 		
 		vec4 color;
 		//color.xyz = mix(sampleS.xyz, sampleF.xyz, w);
@@ -41,11 +40,11 @@ void main() {
 	else {
 		result = sampleF;
 	}
-	
+	if(iteration == 4) result.a = 1;
 	imageStore(outputImage, ivec2(gl_FragCoord.xy) , result);
 	//colorOut = result;
 	discard;
-	
+
 	
 	
 	

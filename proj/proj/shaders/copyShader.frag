@@ -13,7 +13,7 @@ uniform layout(rgba32f) writeonly image2D outputImage;
 void main() {
 	vec4 color = texture(inputTexture, texC);
 	if(	color.a > 0) {
-		color.a = 0.8;
+		color.a = 1.0;
 	}
 	else {
 		color.a = 0;

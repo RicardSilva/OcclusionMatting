@@ -110,7 +110,7 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		glBindImageTexture(2, finalTextureF, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+		glBindImageTexture(2, finalTextureF, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 
 		glGenTextures(1, &propagationCosts);
 		glBindTexture(GL_TEXTURE_2D, propagationCosts);
@@ -119,10 +119,10 @@ public:
 
 
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		glBindImageTexture(3, propagationCosts, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32UI);
+		glBindImageTexture(3, propagationCosts, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 		
 		initializeShader = ShaderManager::instance()->getShader("imagePropagation");
 		copyShader = ShaderManager::instance()->getShader("copy");
@@ -163,8 +163,8 @@ public:
 
 		//glBindImageTexture(0, textureF, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 		//glBindImageTexture(1, multiLevelTextures[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-		glBindImageTexture(2, finalTextureF, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-		glBindImageTexture(3, propagationCosts, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32UI);
+		glBindImageTexture(2, finalTextureF, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		glBindImageTexture(3, propagationCosts, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 		
 		//build foreground/background texture
 		glViewport(0, 0, 1024, 1024);
@@ -202,7 +202,6 @@ public:
 			multiLevelFbos[0]->bindFrameBuffer();
 			copyShader->use();
 			copyShader->loadInputTexture(10);
-			copyShader->loadOutputImage(1);
 			plane->draw2();
 			copyShader->unUse();
 			multiLevelFbos[0]->unbindCurrentFrameBuffer();
@@ -228,9 +227,18 @@ public:
 
 			}
 			pyramidBuilderShader->unUse();
+			/*glActiveTexture(GL_TEXTURE10);
+			glBindTexture(GL_TEXTURE_2D, multiLevelTextures[
 
-			
-			
+			4
+
+
+			]);
+			glViewport(0, 0, 1024, 1024);
+			debugShader->use();
+			debugShader->loadInputTexture(10);
+			plane->draw2();
+			debugShader->unUse();*/
 
 			for (int i = 0; i < levels - 1; i++) {
 				fbo = multiLevelFbos[i];
@@ -268,7 +276,7 @@ public:
 
 			
 
-			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			
 			//////5 - POS PROCESS IMAGE S
 			posProcessShader->use();
 			posProcessShader->loadInputTexture(10);
@@ -290,14 +298,9 @@ public:
 		}
 
 		
-	/*	glActiveTexture(GL_TEXTURE10);
-		glBindTexture(GL_TEXTURE_2D, finalTextureF);
-		glViewport(0, 0, 1024, 1024);
-		debugShader->use();
-		debugShader->loadInputTexture(10);
-		plane->draw2();
-		debugShader->unUse();*/
-			
+		
+		
+		
 		
 		glActiveTexture(GL_TEXTURE0 + outputImage);
 		glBindTexture(GL_TEXTURE_2D, finalTextureF);
