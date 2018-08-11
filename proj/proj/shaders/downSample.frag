@@ -127,14 +127,45 @@ vec4 gaussianBlur3x32() {
 	return result;
 }
 
+vec4 sample2x2() {
+	float offsetX = 1.0 / textureWidth;
+	float offsetY = 1.0 / textureHeight;	
+	
+	vec4 result = vec4(0,0,0,0);
+    float finalAlpha = 0.0; 
+	vec4 fetchedColor;
+	float scaleWithAlpha;
+	
+	for(int x = -1; x <= 0; x++) {
+		for(int y = -1; y <=0; y++) {		
+			fetchedColor = texture(inputTexture, texC + vec2(x*offsetX, y*offsetY));
+			scaleWithAlpha = fetchedColor.a  * 1.0/4.0;
+			result += fetchedColor * scaleWithAlpha;
+			finalAlpha += scaleWithAlpha;
+		}
+	}
+	
+	 if (finalAlpha <= 0.0)
+        discard;
+    else
+    {
+        result.xyz /= finalAlpha;
+		result.a = finalAlpha;
+		
+    }
+	return result;
+}
+
 
 void main() {
 	
 		
 	//colorOut = gaussianBlur3x3();
-	vec2 t = vec2(texC.s - 0.001/textureWidth, texC.t - 0.001/textureHeight);
-	colorOut = texture(inputTexture, t);
+	//vec2 t = vec2(texC.s - 0.001/textureWidth, texC.t - 0.001/textureHeight);
+	//colorOut = texture(inputTexture, t);
 	//colorOut = texture(inputTexture, texC);
 	//colorOut = gaussianBlur3x32();
+	colorOut = sample2x2();
+	
 	
 }
