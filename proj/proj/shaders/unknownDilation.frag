@@ -168,7 +168,7 @@ void main() {
 		colorOut = vec4(0.5,0.5,0.5,0.9); // unknown -> grey
 	}
 	else {
-		if(expandUnknown(texC) == true) {
+		if(expandUnknown3(texC) == true) {
 			colorOut = vec4(0.5,0.5,0.5,0.9); // unknown -> grey
 		}
 		else {
