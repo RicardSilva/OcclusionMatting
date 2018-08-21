@@ -234,7 +234,7 @@ void GameManager::initMeshes() {
 	ObjModel* model;
 		
 	std::vector<pair<string, string>> modelsToLoad;
-	modelsToLoad.push_back(std::make_pair("cube", "objs/cube.obj"));
+	modelsToLoad.push_back(std::make_pair("cube", "objs/cube2.obj"));
 	modelsToLoad.push_back(std::make_pair("plane", "objs/plane.obj"));
 
 	for (auto m : modelsToLoad) {
@@ -384,7 +384,6 @@ void GameManager::display() {
 	//TODO: image pyramid stuff
 	foregroundPyramid->expandImage();
 	backgroundPyramid->expandImage();
-
 	finalOutputShader->use();
 	plane->draw2();
 	finalOutputShader->unUse();

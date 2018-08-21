@@ -114,15 +114,15 @@ public:
 
 		glGenTextures(1, &propagationCosts);
 		glBindTexture(GL_TEXTURE_2D, propagationCosts);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, 1024, 1024,
-			0, GL_RED, GL_FLOAT, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 1024, 1024,
+			0, GL_RGBA, GL_FLOAT, 0);
 
 
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		glBindImageTexture(3, propagationCosts, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
+		glBindImageTexture(3, propagationCosts, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 		
 		initializeShader = ShaderManager::instance()->getShader("imagePropagation");
 		copyShader = ShaderManager::instance()->getShader("copy");
@@ -164,7 +164,7 @@ public:
 		//glBindImageTexture(0, textureF, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 		//glBindImageTexture(1, multiLevelTextures[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 		glBindImageTexture(2, finalTextureF, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-		glBindImageTexture(3, propagationCosts, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
+		glBindImageTexture(3, propagationCosts, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 		
 		//build foreground/background texture
 		glViewport(0, 0, 1024, 1024);
@@ -172,7 +172,7 @@ public:
 		initializeShader->use();
 		initializeShader->loadInputTexture(2);
 		initializeShader->loadMode(mode);
-		initializeShader->loadOutputImage(0);
+		initializeShader->loadOutputImage(3);
 		plane->draw2();
 		initializeShader->unUse();
 		initialFbo->unbindCurrentFrameBuffer();
@@ -283,7 +283,7 @@ public:
 			posProcessShader->loadInputTexture2(11);
 			posProcessShader->loadOutputImage(2);
 			posProcessShader->loadOutputImage2(3);
-			posProcessShader->loadIteration(step);
+			posProcessShader->loadIteration((float)step);
 			posProcessShader->loadTextureWidth(1024);
 			posProcessShader->loadTextureHeight(1024);
 			plane->draw2();

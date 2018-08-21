@@ -14,14 +14,12 @@ uniform sampler2D expandedBackground;
 uniform sampler2D propagationCostsForeground;
 uniform sampler2D propagationCostsBackground;
 
+uniform sampler2D realSmoothDepth;
+
 uniform sampler2D trimapEdge;
 uniform sampler2D realColorEdge;
 
 uniform sampler2D unknownLabels;
-
-const float zNear = 0.1;
-const float zFar = 8000.0;
-
 
 const float resX = 1920.0;
 const float resY = 1080.0;
@@ -43,9 +41,11 @@ const vec2 offsets[9] = vec2[9] (
 
 float alphaEstimation(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelColor) {
 	float l = length(foregroundColor - backgroundColor);
-	return dot((pixelColor - backgroundColor), 
+	float estimation = dot((pixelColor - backgroundColor), 
 			 (foregroundColor - backgroundColor))
 			/ (l * l);
+	if(estimation > 0.8) estimation =1 ;
+	return estimation;
 }
 
 float colorCost(vec4 foregroundColor, vec4 backgroundColor,
@@ -59,16 +59,16 @@ float colorCost(vec4 foregroundColor, vec4 backgroundColor,
 }
 
 float propagationCost(vec4 foregroundColor, vec4 backgroundColorn, int i) {
-	float dm = 4.0; //FIX ME
-	return (texture(propagationCostsForeground, texC + offsets[i]).r 
-	+ texture(propagationCostsBackground, texC + offsets[i]).r ) / 2.0f * dm;
+	float dm = 5.0; //FIX ME
+	return (texture(propagationCostsForeground, texC + offsets[i]).r * 10
+	+ texture(propagationCostsBackground, texC + offsets[i]).r * 10 ) / 2.0f * dm;
 }
 
 float objectiveFunction(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelColor, int i) {
 	//find min of sum of color cost with propagation cost around the pixel
 	float weight = 2f;
 	return weight * colorCost(foregroundColor, backgroundColor, pixelColor) 
-		+ 0*  propagationCost(foregroundColor, backgroundColor, i);
+		+   propagationCost(foregroundColor, backgroundColor, i);
 	
 	
 }
@@ -147,11 +147,10 @@ void main() {
 	//colorOut = texture(finalTrimap, texC);
 	//colorOut = texture(expandedForeground, texC);
 	//colorOut = texture(expandedBackground, texC);
-	//colorOut = texture(virtualColor, texC);
-	//colorOut = texture(propagationCostsForeground, texC);
+	//colorOut = texture(realColor, texC);
+	colorOut = vec4(texture(realSmoothDepth, texC).rrr, 1);
 	
-	colorOut.a = 1;
-	
+	//colorOut.a =1 ;
 }
 
 

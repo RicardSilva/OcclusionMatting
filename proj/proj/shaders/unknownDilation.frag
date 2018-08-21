@@ -140,8 +140,8 @@ bool expandUnknown2(vec2 coords) {
 }
 
 bool expandUnknown3(vec2 coords) {
-for(int i = -5; i <= 5; i++) {
-	for(int j = -5; j <= 5; j++) {
+for(int i = -4; i <= 4; i++) {
+	for(int j = -4; j <= 4; j++) {
 		vec4 trimapColor = texture(trimapEdge, coords + vec2(i * offsetX, j* offsetY));
 		if(trimapColor.a < 1) {
 			return true;

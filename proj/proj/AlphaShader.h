@@ -37,6 +37,9 @@ private:
 	GLint modeID;
 	GLint expandedForegroundID;
 	GLint expandedBackgroundID;
+	GLint expandedForegroundCostsID;
+	GLint expandedBackgroundCostsID;
+
 
 	GLint textureWidthID;
 	GLint textureHeightID;
@@ -79,6 +82,8 @@ public:
 		modeID = getUniformLocation("mode");
 		expandedForegroundID = getUniformLocation("expandedForeground");
 		expandedBackgroundID = getUniformLocation("expandedBackground");
+		expandedForegroundCostsID = getUniformLocation("propagationCostsForeground");
+		expandedBackgroundCostsID = getUniformLocation("propagationCostsBackground");
 
 		textureWidthID = getUniformLocation("textureWidth");
 		textureHeightID = getUniformLocation("textureHeight");
@@ -102,6 +107,8 @@ public:
 		Shader::loadInt(finalTrimapID, 9);
 		Shader::loadInt(expandedForegroundID, 14);
 		Shader::loadInt(expandedBackgroundID, 15);
+		Shader::loadInt(expandedForegroundCostsID, 16);
+		Shader::loadInt(expandedBackgroundCostsID, 17);
 
 		Shader::loadInt(debugTextureID, 10);
 		
@@ -143,8 +150,8 @@ public:
 	}
 
 
-	void loadIteration(int i) {
-		Shader::loadInt(iterationID, i);
+	void loadIteration(float i) {
+		Shader::loadFloat(iterationID, i);
 	}
 	void loadMode(int mode) {
 		Shader::loadInt(modeID, mode);

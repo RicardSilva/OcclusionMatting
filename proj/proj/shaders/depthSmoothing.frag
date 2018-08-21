@@ -21,21 +21,50 @@ const float resY = 1080.0;
 const float offsetX = 1.0 / resX;
 const float offsetY = 1.0 / resY;
 
+float depthValues[25];
 
- 
-// A function to implement bubble sort
-void bubbleSort(float arr[9])
+void bubbleSort()
 {
-   int i, j;
-   for (i = 0; i < 9; i++)      
- 
-       // Last i elements are already in place   
-       for (j = 0; j < 9-i-1; j++) 
-           if (arr[j] > arr[j+1]) {
-              float temp = arr[j];
-			  arr[j] = arr[j+1];
-			  arr[j+1] = temp;
-		   }
+    bool swapped = true;
+    int j = 0;
+    float tmp;
+	
+	for(int i = 0; i < 24; i++) {
+		if (!swapped)
+            break;
+        swapped = false;
+		if (depthValues[i] > depthValues[i + 1])
+            {
+                tmp = depthValues[i];
+                depthValues[i] = depthValues[i + 1];
+                depthValues[i + 1] = tmp;
+                swapped = true;
+            }
+	}
+}
+
+vec4 medianFilter5x5(vec2 coords) {
+	
+	float thisDepth = texture(realDepth, coords).r;
+	if(thisDepth == -1.0) {
+		return vec4(0,1,0,1);
+	}
+	int counter = 0;
+    for (int i = -2; i <= 2; i++) {
+		for (int j = -2; j <= 2; j++) {
+			depthValues[counter++] = texture(realDepth, coords + vec2(i * offsetX, j * offsetY)).r;
+			
+		}
+    }
+
+    bubbleSort();
+	float result = depthValues[12];
+	if(result == -1.0) {
+		return vec4(0,1,0,1);
+	}
+		
+	return vec4(result, 0,0,1);
+
 }
 
 vec4 lowPassFilter3x3(vec2 coords) {
@@ -71,7 +100,32 @@ vec4 lowPassFilter3x3(vec2 coords) {
 	
 }
 
-
+vec4 lowPassFilter5x5(vec2 coords) {
+	float thisDepth = texture(realDepth, coords).r;
+	if(thisDepth == -1.0) {
+		return vec4(0,1,0,1);
+	}
+	float result = 0.0;
+	
+	for(int i = -2; i <= 2; i++) {
+		for(int j = -2; j <= 2; j++) {
+			
+			float d = texture(realDepth, coords + vec2(i * offsetX, j * offsetY)).r;
+			if(d == -1) {
+				result += thisDepth / 25.0;
+			}
+			else {
+				result += d / 25.0;
+			}
+			
+			
+			
+		}	
+	}	
+	
+	return vec4(result, 0,0,1);
+	
+}
 
 
 void main() {
@@ -89,7 +143,11 @@ void main() {
 	
 	
 	vec2 v_texcoord = vec2(texC.s, 1.0 - texC.t);
-	colorOut = lowPassFilter3x3(v_texcoord);
+	colorOut = vec4(texture(realDepth, v_texcoord).r,0,0,1);
+	//colorOut = lowPassFilter3x3(v_texcoord);
+	//colorOut = lowPassFilter5x5(v_texcoord);
+	//colorOut = medianFilter5x5(v_texcoord);
+	
 	
 	
 	

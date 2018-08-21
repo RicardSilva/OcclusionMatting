@@ -10,23 +10,23 @@ uniform sampler2D inputTexture; // INPUT TEXTURE F
 uniform sampler2D inputTexture2; // INPUT TEXTURE S
 
 uniform layout(rgba32f) writeonly image2D outputImage;
-uniform layout(size1x32) writeonly uimage2D outputImage2;
-uniform int iteration;
+uniform layout(rgba32f) image2D outputImage2;
+uniform float iteration;
 
-const float n = 1;
-
+const float n = 0.5;
+const float iterations = 5;
 
 void main() {
 	
 	vec4 sampleF = texture(inputTexture, texC);
 	
 	vec4 sampleS = texture(inputTexture2, texC);
-	
 	vec4 result;
 	if(	sampleS.a > 0) {
-		if(sampleF.a == 0) {
-			imageStore(outputImage2, ivec2(gl_FragCoord.xy) , ivec4(iteration));
+		if(imageLoad(outputImage2, ivec2(gl_FragCoord.xy)) == vec4(0,0,0,0)) {
+			imageStore(outputImage2, ivec2(gl_FragCoord.xy) , vec4(iteration*0.1, 0,0, 1));
 		}
+		
 	
 		float w = sampleF.a / n;
 		
@@ -40,7 +40,9 @@ void main() {
 	else {
 		result = sampleF;
 	}
-	if(iteration == 4) result.a = 1;
+	if(iteration == iterations - 1) {
+		result.a = 1;
+	}
 	imageStore(outputImage, ivec2(gl_FragCoord.xy) , result);
 	//colorOut = result;
 	discard;

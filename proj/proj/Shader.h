@@ -66,7 +66,7 @@ public:
 	virtual void loadInputTexture(int source) {}
 	virtual void loadInputTexture2(int source) {}
 
-	virtual void loadIteration(int i) {}
+	virtual void loadIteration(float i) {}
 	virtual void loadMode(int mode) {}
 
 	virtual void loadTextureWidth(int width) {}

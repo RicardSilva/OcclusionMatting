@@ -26,7 +26,7 @@ void main(void) {
 	if(mode == 0) {
 		if(trimapColor == vec4(1,1,1,1)) { //WHITE ->	FOREGROUND
 			color = texture(inputTexture, texC);
-			color.a = 1f;
+			color.a = 0.5f;
 		}
 		else {
 			color = vec4(0,0,0,0);
@@ -35,23 +35,23 @@ void main(void) {
 	else if (mode == 1) {
 		if(trimapColor == vec4(0,0,0,1)) { //BLACK ->	BACKGROUND
 			color = texture(inputTexture, texC);
-			color.a = 1f;
+			color.a = 0.5f;
 		}
 		else {
 			color = vec4(0,0,0,0);
 		}
 			
 	}
-	/*
-	if((0.5-texC.s) * (0.5-texC.s)  + (0.5-texC.t) * (0.5-texC.t)  <= 0.025) {
+	
+	/*if((0.5-texC.s) * (0.5-texC.s)  + (0.5-texC.t) * (0.5-texC.t)  <= 0.025) {
 		color = vec4(texC.s, texC.t, 0, 1);
-		color.a = 0.8f;
+		color.a = 0.5f;
 		
 	}
 	else {
 		color = vec4(0,0,0,0);
 	}*/
-	//imageStore(outputImage, ivec2(gl_FragCoord.xy) , color);
+	imageStore(outputImage, ivec2(gl_FragCoord.xy) , vec4(0));
 	//discard;
 	colorOut = color;
 	

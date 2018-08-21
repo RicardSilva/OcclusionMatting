@@ -82,6 +82,9 @@ vec4 gaussianBlur3x3() {
         fetchedColor = samples[i];
         scaleWithAlpha = fetchedColor.a * weights[i];
         result += fetchedColor * scaleWithAlpha;
+		if(scaleWithAlpha == 0) {
+				scaleWithAlpha = 1.0f/4.0f;
+			}
         finalAlpha += scaleWithAlpha;
 
     }
@@ -139,7 +142,7 @@ vec4 sample2x2() {
 	for(int x = -1; x <= 0; x++) {
 		for(int y = -1; y <=0; y++) {		
 			fetchedColor = texture(inputTexture, texC + vec2(x*offsetX, y*offsetY));
-			scaleWithAlpha = fetchedColor.a  * 1.0/4.0;
+			scaleWithAlpha = fetchedColor.a  * 1.0f/4.0f;
 			result += fetchedColor * scaleWithAlpha;
 			finalAlpha += scaleWithAlpha;
 		}
