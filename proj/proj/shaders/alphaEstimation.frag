@@ -16,6 +16,8 @@ uniform sampler2D propagationCostsBackground;
 
 uniform sampler2D realSmoothDepth;
 
+
+uniform sampler2D coarseTrimap;
 uniform sampler2D trimapEdge;
 uniform sampler2D realColorEdge;
 
@@ -40,11 +42,11 @@ const vec2 offsets[9] = vec2[9] (
 		
 
 float alphaEstimation(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelColor) {
-	float l = length(foregroundColor - backgroundColor);
-	float estimation = dot((pixelColor - backgroundColor), 
-			 (foregroundColor - backgroundColor))
+	float l = length(foregroundColor.rgb - backgroundColor.rgb);
+	float estimation = dot((pixelColor.rgb - backgroundColor.rgb), 
+			 (foregroundColor.rgb - backgroundColor.rgb))
 			/ (l * l);
-	if(estimation > 0.8) estimation =1 ;
+	if(estimation > 0.1) estimation = 1 ;
 	return estimation;
 }
 
@@ -130,25 +132,31 @@ void main() {
 	vec4 trimapColor = texture(finalTrimap, texC);
 	if(trimapColor == vec4(1,0,0,1)) {//RED -> REAL COLOR
 		colorOut = texture(realColor, texC);
+		alpha = 0;
 	}
 	else if (trimapColor == vec4(1,1,1,1)) { //WHITE -> REAL COLOR
 		colorOut = texture(realColor, texC);
+		alpha = 0;
 	}
 	else if (trimapColor == vec4(0,0,0,1)){ //BLACK -> VIRTUAL COLOR
 		colorOut = texture(virtualColor, texC);
+		alpha = 1;
 	}
-	else if (trimapColor.a < 1) {	//UNKNOWN -> compute best color
+	 if (trimapColor.a < 1) {	//UNKNOWN -> compute best color
 		alpha = computeAlpha();
-		colorOut = alpha * texture(realColor, texC) + (1 - alpha) * texture(virtualColor, texC);
+		colorOut = alpha * texture(realColor , texC) + (1 - alpha) * texture(virtualColor, texC);
 		//colorOut = vec4(0,1,0,1);
 	}
 	
 	//colorOut = vec4(alpha, alpha,alpha, 1);
-	//colorOut = texture(finalTrimap, texC);
+	//colorOut = texture(finalTrimap, texC) * 0.5;
+	//if(texture(trimapEdge, texC).a < 1) colorOut = vec4(1,0,0,1);
+	//colorOut += vec4(0, texture(realColorEdge, texC).r + texture(realColorEdge, texC).g + texture(realColorEdge, texC).b ,0,1 );
 	//colorOut = texture(expandedForeground, texC);
 	//colorOut = texture(expandedBackground, texC);
+	
 	//colorOut = texture(realColor, texC);
-	colorOut = vec4(texture(realSmoothDepth, texC).rrr, 1);
+	//colorOut = vec4(texture(realSmoothDepth, texC).rrr, 1);
 	
 	//colorOut.a =1 ;
 }

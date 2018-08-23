@@ -61,8 +61,8 @@ void GameManager::init() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	realDepthTexture = texture2;
 
-	foregroundPyramid = new ImagePyramid(0,4,5);
-	backgroundPyramid = new ImagePyramid(1,4,5);
+	foregroundPyramid = new ImagePyramid(0,3,5);
+	backgroundPyramid = new ImagePyramid(1,3,5);
 
 }
 
@@ -180,11 +180,6 @@ void GameManager::initShaders() {
 	copyShader->unUse();
 	ShaderManager::instance()->addShader("copy", copyShader);
 
-	Shader* initializeAlphaShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/initializeFAlpha.frag");
-	initializeAlphaShader->use();
-	initializeAlphaShader->bindTextureUnits();
-	initializeAlphaShader->unUse();
-	ShaderManager::instance()->addShader("iniAlpha", initializeAlphaShader);
 
 	Shader* preProcessShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/preProcess.frag");
 	preProcessShader->use();
@@ -382,19 +377,25 @@ void GameManager::display() {
 	glBindTexture(GL_TEXTURE_2D, finalTrimapTexture);
 
 	//TODO: image pyramid stuff
-	foregroundPyramid->expandImage();
-	backgroundPyramid->expandImage();
+
+	
+
+
+	
+	
+
+
+	
 	finalOutputShader->use();
 	plane->draw2();
 	finalOutputShader->unUse();
+	
 
-	/*glViewport(0, 0, 1024, 1024);
-	debugShader->use();
-	debugShader->loadInputTexture(14);
-	plane->draw2();
-	debugShader->unUse();*/
-	
-	
+
+	backgroundPyramid->expandImage();
+
+	foregroundPyramid->expandImage();
+
 
 	glutSwapBuffers();
 	
