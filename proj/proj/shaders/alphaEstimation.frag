@@ -46,7 +46,7 @@ float alphaEstimation(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelColo
 	float estimation = dot((pixelColor.rgb - backgroundColor.rgb), 
 			 (foregroundColor.rgb - backgroundColor.rgb))
 			/ (l * l);
-	if(estimation > 0.1) estimation = 1 ;
+	if(estimation > 0.2) estimation = 1 ;
 	return estimation;
 }
 
