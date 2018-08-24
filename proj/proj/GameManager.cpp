@@ -61,8 +61,8 @@ void GameManager::init() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	realDepthTexture = texture2;
 
-	foregroundPyramid = new ImagePyramid(0,3,5);
-	backgroundPyramid = new ImagePyramid(1,3,5);
+	foregroundPyramid = new ImagePyramid(0,5,5);
+	backgroundPyramid = new ImagePyramid(1,5,5);
 
 }
 

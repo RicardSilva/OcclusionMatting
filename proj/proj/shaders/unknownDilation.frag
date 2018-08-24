@@ -29,7 +29,7 @@ const float offsetY = 1.0 / resY;
 
 bool expandUnknown(vec2 coords) {
 	
-	int dilationWindow = 2;
+	int dilationWindow = 20;
 	int noEdgeCounter = 0;
 	for(int k = -5; k <= 5; k++) {
 		for(int l = -5; l <= 5; l++) {
@@ -39,7 +39,7 @@ bool expandUnknown(vec2 coords) {
 			
 		}
 	}
-	if(noEdgeCounter >= 3) dilationWindow = 10;
+	if(noEdgeCounter >= 3) dilationWindow = 30;
 	
 						
 	for(int i = -dilationWindow; i <= dilationWindow; i++) {
