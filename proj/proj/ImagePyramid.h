@@ -227,18 +227,7 @@ public:
 
 			}
 			pyramidBuilderShader->unUse();
-			/*glActiveTexture(GL_TEXTURE10);
-			glBindTexture(GL_TEXTURE_2D, multiLevelTextures[
-
-			4
-
-
-			]);
-			glViewport(0, 0, 1024, 1024);
-			debugShader->use();
-			debugShader->loadInputTexture(10);
-			plane->draw2();
-			debugShader->unUse();*/
+			
 
 			for (int i = 0; i < levels - 1; i++) {
 				fbo = multiLevelFbos[i];
@@ -267,7 +256,7 @@ public:
 		
 			glViewport(0, 0, 1024, 1024);
 			
-		
+			
 			
 			glActiveTexture(GL_TEXTURE10);
 			glBindTexture(GL_TEXTURE_2D, textureF);
@@ -298,7 +287,18 @@ public:
 		}
 
 		
-		
+		glActiveTexture(GL_TEXTURE10);
+	/*	glBindTexture(GL_TEXTURE_2D, multiLevelTextures[
+
+			0
+
+
+		]);
+	glViewport(0, 0, 1024, 1024);
+		debugShader->use();
+		debugShader->loadInputTexture(10);
+		plane->draw2();
+		debugShader->unUse()*/; 
 		
 		
 		

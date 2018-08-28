@@ -30,6 +30,16 @@ private:
 	GLint realColorEdgeID;
 	GLint unknownLabelsID;
 	GLint finalTrimapID;
+	GLint finalID;
+	GLint finalID2;
+	GLint finalID3;
+	GLint finalID4;
+	GLint finalID5;
+	GLint finalID6;
+	GLint finalID7;
+	GLint finalID8;
+	GLint finalID9;
+	GLint finalID10;
 
 	GLint inputTextureSourceID;
 	GLint inputTextureSource2ID;
@@ -76,6 +86,18 @@ public:
 		realColorEdgeID = getUniformLocation("realColorEdge");
 		unknownLabelsID = getUniformLocation("unknownLabels");
 		finalTrimapID = getUniformLocation("finalTrimap");
+
+		finalID = getUniformLocation("alphaMap");
+		finalID2 = getUniformLocation("alphaMap2");
+		finalID3 = getUniformLocation("alphaMap3");
+		finalID4 = getUniformLocation("alphaMap4");
+		finalID5 = getUniformLocation("alphaMap5");
+		finalID6 = getUniformLocation("alphaMap6");
+		finalID7 = getUniformLocation("alphaMap7");
+		finalID8 = getUniformLocation("alphaMap8");
+		finalID9 = getUniformLocation("alphaMap9");
+		finalID10 = getUniformLocation("alphaMap10");
+
 		inputTextureSourceID = getUniformLocation("inputTexture");
 		inputTextureSource2ID = getUniformLocation("inputTexture2");
 		iterationID = getUniformLocation("iteration");
@@ -109,6 +131,16 @@ public:
 		Shader::loadInt(expandedBackgroundID, 15);
 		Shader::loadInt(expandedForegroundCostsID, 16);
 		Shader::loadInt(expandedBackgroundCostsID, 17);
+		Shader::loadInt(finalID, 20);
+		Shader::loadInt(finalID2, 21);
+		Shader::loadInt(finalID3, 22);
+		Shader::loadInt(finalID4, 23);
+		Shader::loadInt(finalID5, 24);
+		Shader::loadInt(finalID6, 25);
+		Shader::loadInt(finalID7, 26);
+		Shader::loadInt(finalID8, 27);
+		Shader::loadInt(finalID9, 28);
+		Shader::loadInt(finalID10, 29);
 
 		Shader::loadInt(debugTextureID, 10);
 		

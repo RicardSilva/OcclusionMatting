@@ -154,7 +154,7 @@ vec4 sample2x2() {
     {
         result.xyz /= finalAlpha;
 		result.a = finalAlpha;
-		
+		result.a = 1;
     }
 	return result;
 }

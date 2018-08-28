@@ -13,8 +13,8 @@ uniform layout(rgba32f) writeonly image2D outputImage;
 uniform layout(rgba32f) image2D outputImage2;
 uniform float iteration;
 
-const float n = 0.5;
-const float iterations = 5;
+const float n = 0.8;
+const float iterations = 10;
 
 void main() {
 	
@@ -35,6 +35,7 @@ void main() {
 		color.xyz = w * sampleF.xyz + (1-w) * sampleS.xyz;
 		
 		color.a = min(sampleF.a + 1, n);
+		
 		result = color;
 	}
 	else {

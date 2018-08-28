@@ -118,6 +118,12 @@ void GameManager::initFrameBuffers() {
 	finalTrimapTexture = finalTrimapFbo->getColorTexture();
 	frameBuffers.push_back(finalTrimapFbo);
 
+	for (int i = 0; i < 10; i++) {
+		finalFbos[i] = new FrameBuffer(WIDTH, HEIGHT);
+		finalTextures[i] = finalFbos[i]->getColorTexture();
+		
+	}
+
 
 
 }
@@ -219,6 +225,13 @@ void GameManager::initShaders() {
 	debugShader->unUse();
 	ShaderManager::instance()->addShader("debug", debugShader);
 
+	finalShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/final.frag");
+	finalShader->use();
+	finalShader->bindTextureUnits();
+	finalShader->unUse();
+	ShaderManager::instance()->addShader("final", finalShader);
+
+
 	
 }
 void GameManager::initLights() {
@@ -290,10 +303,15 @@ void GameManager::display() {
 		fbo->unbindCurrentFrameBuffer();
 	}
 
+	
+	finalFbos[outputSwitcher]->bindFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	finalFbos[outputSwitcher]->unbindCurrentFrameBuffer();
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	loadIdentity(MODEL);
-	
+
 	activeCamera->computeView();
 	activeCamera->computeProjection(WIDTH, HEIGHT);
 
@@ -376,29 +394,30 @@ void GameManager::display() {
 	glActiveTexture(GL_TEXTURE9);
 	glBindTexture(GL_TEXTURE_2D, finalTrimapTexture);
 
-	//TODO: image pyramid stuff
-
-	
-
-
-	
-	
-
-
-	
-	finalOutputShader->use();
-	plane->draw2();
-	finalOutputShader->unUse();
-	
-
 
 	backgroundPyramid->expandImage();
 
-	foregroundPyramid->expandImage();
+	foregroundPyramid->expandImage(); 
 
+	//finalFbos[outputSwitcher]->bindFrameBuffer();
+	finalOutputShader->use();
+	plane->draw2();
+	finalOutputShader->unUse();
+	//finalFbos[outputSwitcher]->unbindCurrentFrameBuffer();
+	/*
+	for (int i = 0; i < 10; i++) {
+		glActiveTexture(GL_TEXTURE20 + i);
+		glBindTexture(GL_TEXTURE_2D, finalTextures[i]);
+	}
 
+	finalShader->use();
+	plane->draw2();
+	finalShader->unUse();
+
+	outputSwitcher = (outputSwitcher + 1) % 5;*/
+
+	glActiveTexture(0);
 	glutSwapBuffers();
-	
 }
 
 

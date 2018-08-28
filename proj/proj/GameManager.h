@@ -46,6 +46,7 @@
 
 class GameManager {
 	int oldTime = 0;
+	int outputSwitcher = 0;
 
 	// Frame counting and FPS computation
 	unsigned int FrameCount = 0;
@@ -60,6 +61,7 @@ class GameManager {
 	Shader* edgeLabelingShader;
 	Shader* unknownDilationShader;
 	Shader* debugShader;
+	Shader* finalShader;
 
 	Shader* finalOutputShader;
 
@@ -79,6 +81,7 @@ class GameManager {
 	FrameBuffer* realColorEdgeFbo;
 	FrameBuffer* unknownLabelsFbo;
 	FrameBuffer* finalTrimapFbo;
+	FrameBuffer* finalFbos[10];
 	
 
 
@@ -93,8 +96,8 @@ class GameManager {
 	GLuint trimapEdgeTexture;
 	GLuint realColorEdgeTexture;
 	GLuint unknownLabelsTexture;
-	GLuint finalTrimapTexture;
-	
+	GLuint finalTrimapTexture;	
+	GLuint finalTextures[10];
 
 
 	// Intermediate Buffers
