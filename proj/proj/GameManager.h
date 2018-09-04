@@ -56,6 +56,7 @@ class GameManager {
 	Shader* depthSmoothingShader;
 	Shader* invertRealColorShader;
 	Shader* coarseTrimapShader;
+	Shader* coarseTrimapShader2;
 	Shader* edgeDetectionShader;
 	Shader* colorEdgeDetectionShader;
 	Shader* edgeLabelingShader;
@@ -82,7 +83,7 @@ class GameManager {
 	FrameBuffer* unknownLabelsFbo;
 	FrameBuffer* finalTrimapFbo;
 	FrameBuffer* finalFbos[10];
-	
+	FrameBuffer* dilatedFbo;
 
 
 	GLuint virtualColorTexture;
@@ -98,6 +99,7 @@ class GameManager {
 	GLuint unknownLabelsTexture;
 	GLuint finalTrimapTexture;	
 	GLuint finalTextures[10];
+	GLuint dilatedTrimap;
 
 
 	// Intermediate Buffers

@@ -9,6 +9,7 @@ layout(location = 0) out vec4 colorOut;
 
 
 uniform sampler2D finalTrimap;
+uniform sampler2D dilatedTrimap;
 
 uniform sampler2D inputTexture; // INPUT TEXTURE
 uniform layout(rgba32f) writeonly image2D outputImage;
@@ -22,23 +23,27 @@ const float n = 0.8f;
 
 void main(void) {
 	vec4 color;
-	vec4 trimapColor = texture(finalTrimap, texC);
+	vec4 trimapColor = texture(dilatedTrimap, texC);
 	if(mode == 0) {
 		if(trimapColor == vec4(1,1,1,1)) { //WHITE ->	FOREGROUND
 			color = texture(inputTexture, texC);
 			color.a = n;
+			imageStore(outputImage, ivec2(gl_FragCoord.xy) , vec4(0,0,0,1));
 		}
 		else {
 			color = vec4(0,0,0,0);
+			imageStore(outputImage, ivec2(gl_FragCoord.xy) , vec4(0.6,0,0,1));
 		}
 	}
 	else if (mode == 1) {
 		if(trimapColor == vec4(0,0,0,1)) { //BLACK ->	BACKGROUND
 			color = texture(inputTexture, texC);
 			color.a = n;
+			imageStore(outputImage, ivec2(gl_FragCoord.xy) , vec4(0,0,0,1));
 		}
 		else {
 			color = vec4(0,0,0,0);
+			imageStore(outputImage, ivec2(gl_FragCoord.xy) , vec4(0.6,0,0,1));
 		}
 			
 	}
@@ -51,8 +56,10 @@ void main(void) {
 	else {
 		color = vec4(0,0,0,0);
 	}*/
-	imageStore(outputImage, ivec2(gl_FragCoord.xy) , vec4(0));
-	//discard;
+	
+	
+	
+	
 	colorOut = color;
 	
 	

@@ -30,6 +30,7 @@ private:
 	GLint realColorEdgeID;
 	GLint unknownLabelsID;
 	GLint finalTrimapID;
+	GLint dilatedTrimapID;
 	GLint finalID;
 	GLint finalID2;
 	GLint finalID3;
@@ -86,6 +87,7 @@ public:
 		realColorEdgeID = getUniformLocation("realColorEdge");
 		unknownLabelsID = getUniformLocation("unknownLabels");
 		finalTrimapID = getUniformLocation("finalTrimap");
+		dilatedTrimapID = getUniformLocation("dilatedTrimap");
 
 		finalID = getUniformLocation("alphaMap");
 		finalID2 = getUniformLocation("alphaMap2");
@@ -131,6 +133,9 @@ public:
 		Shader::loadInt(expandedBackgroundID, 15);
 		Shader::loadInt(expandedForegroundCostsID, 16);
 		Shader::loadInt(expandedBackgroundCostsID, 17);
+		Shader::loadInt(dilatedTrimapID, 18);
+		
+
 		Shader::loadInt(finalID, 20);
 		Shader::loadInt(finalID2, 21);
 		Shader::loadInt(finalID3, 22);

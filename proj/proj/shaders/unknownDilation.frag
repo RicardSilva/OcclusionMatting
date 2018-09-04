@@ -29,7 +29,7 @@ const float offsetY = 1.0 / resY;
 
 bool expandUnknown(vec2 coords) {
 	
-	int dilationWindow = 15;
+	int dilationWindow = 18;
 	int noEdgeCounter = 0;
 	for(int k = -5; k <= 5; k++) {
 		for(int l = -5; l <= 5; l++) {
@@ -83,8 +83,9 @@ bool expandUnknown(vec2 coords) {
 
 
 bool expandUnknown2(vec2 coords) {
-for(int i = -4; i <= 4; i++) {
-	for(int j = -4; j <= 4; j++) {
+	int windowSize = 2;
+for(int i = -windowSize; i <= windowSize; i++) {
+	for(int j = -windowSize; j <= windowSize; j++) {
 		vec4 trimapColor = texture(trimapEdge, coords + vec2(i * offsetX, j* offsetY));
 		if(trimapColor.a < 1) {
 			return true;

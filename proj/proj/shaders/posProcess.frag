@@ -18,14 +18,15 @@ const float iterations = 10;
 
 void main() {
 	
-	vec4 sampleF = texture(inputTexture, texC);
-	
+	vec4 sampleF = texture(inputTexture, texC);	
 	vec4 sampleS = texture(inputTexture2, texC);
+	
 	vec4 result;
 	if(	sampleS.a > 0) {
-		if(imageLoad(outputImage2, ivec2(gl_FragCoord.xy)) == vec4(0,0,0,0)) {
-			imageStore(outputImage2, ivec2(gl_FragCoord.xy) , vec4(iteration*0.1, 0,0, 1));
-		}
+		vec4 prevColor = imageLoad(outputImage2, ivec2(gl_FragCoord.xy));
+		if(prevColor.r != 0)
+			imageStore(outputImage2, ivec2(gl_FragCoord.xy) , prevColor - vec4(0.1, 0,0, 0));
+		
 		
 	
 		float w = sampleF.a / n;

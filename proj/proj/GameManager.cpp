@@ -61,8 +61,8 @@ void GameManager::init() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	realDepthTexture = texture2;
 
-	foregroundPyramid = new ImagePyramid(0,5,5);
-	backgroundPyramid = new ImagePyramid(1,5,5);
+	foregroundPyramid = new ImagePyramid(0,4,5);
+	backgroundPyramid = new ImagePyramid(1,4,5);
 
 }
 
@@ -118,6 +118,10 @@ void GameManager::initFrameBuffers() {
 	finalTrimapTexture = finalTrimapFbo->getColorTexture();
 	frameBuffers.push_back(finalTrimapFbo);
 
+	dilatedFbo = new FrameBuffer(WIDTH, HEIGHT);
+	dilatedTrimap = dilatedFbo->getColorTexture();
+	frameBuffers.push_back(dilatedFbo);
+
 	for (int i = 0; i < 10; i++) {
 		finalFbos[i] = new FrameBuffer(WIDTH, HEIGHT);
 		finalTextures[i] = finalFbos[i]->getColorTexture();
@@ -148,6 +152,12 @@ void GameManager::initShaders() {
 	coarseTrimapShader->bindTextureUnits();
 	coarseTrimapShader->unUse();
 	ShaderManager::instance()->addShader("coarseTrimap", coarseTrimapShader);
+	coarseTrimapShader2 = new AlphaShader("shaders/alphaMatting.vert", "shaders/coarseTrimap2.frag");
+	coarseTrimapShader2->use();
+	coarseTrimapShader2->bindTextureUnits();
+	coarseTrimapShader2->unUse();
+	ShaderManager::instance()->addShader("coarseTrimap2", coarseTrimapShader2);
+
 
 	edgeDetectionShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/edgeDetection.frag");
 	edgeDetectionShader->use();
@@ -394,27 +404,33 @@ void GameManager::display() {
 	glActiveTexture(GL_TEXTURE9);
 	glBindTexture(GL_TEXTURE_2D, finalTrimapTexture);
 
+	dilatedFbo->bindFrameBuffer();
+	coarseTrimapShader2->use();
+	plane->draw2();
+	coarseTrimapShader2->unUse();
+	dilatedFbo->unbindCurrentFrameBuffer();
+
+	glActiveTexture(GL_TEXTURE18);
+	glBindTexture(GL_TEXTURE_2D, dilatedTrimap);
+
 
 	backgroundPyramid->expandImage();
 
 	foregroundPyramid->expandImage(); 
 
-	//finalFbos[outputSwitcher]->bindFrameBuffer();
+	finalFbos[0]->bindFrameBuffer();
 	finalOutputShader->use();
 	plane->draw2();
 	finalOutputShader->unUse();
-	//finalFbos[outputSwitcher]->unbindCurrentFrameBuffer();
-	/*
-	for (int i = 0; i < 10; i++) {
-		glActiveTexture(GL_TEXTURE20 + i);
-		glBindTexture(GL_TEXTURE_2D, finalTextures[i]);
-	}
+	finalFbos[0]->unbindCurrentFrameBuffer();
+	
+	glActiveTexture(GL_TEXTURE20 );
+	glBindTexture(GL_TEXTURE_2D, finalTextures[0]);
 
 	finalShader->use();
 	plane->draw2();
 	finalShader->unUse();
 
-	outputSwitcher = (outputSwitcher + 1) % 5;*/
 
 	glActiveTexture(0);
 	glutSwapBuffers();

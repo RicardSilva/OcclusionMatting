@@ -10,15 +10,8 @@ uniform sampler2D virtualColor;
 uniform sampler2D realColor;
 
 uniform sampler2D alphaMap;
-uniform sampler2D alphaMap2;
-uniform sampler2D alphaMap3;
-uniform sampler2D alphaMap4;
-uniform sampler2D alphaMap5;
-uniform sampler2D alphaMap6;
-uniform sampler2D alphaMap7;
-uniform sampler2D alphaMap8;
-uniform sampler2D alphaMap9;
-uniform sampler2D alphaMap10;
+
+uniform sampler2D realSmoothDepth;
 
 
 const float resX = 1920.0;
@@ -59,17 +52,40 @@ float average() {
 	return sum / 10.0f;
 }
 
+float lowPassFilter5x5(vec2 coords) {
+	float thisAlpha = texture(alphaMap, coords).r;
+	float result = 0.0;
+	int size = 2;
+	if(thisAlpha == 0 || thisAlpha == 1) return thisAlpha;
+	for(int i = -size; i <= size; i++) {
+		for(int j = -size; j <= size; j++) {
+			
+			float d = texture(alphaMap, coords + vec2(i * offsetX, j * offsetY)).r;
+			if(d == 0)
+				result += thisAlpha / 25.0 ;
+			else
+				result += d / 25.0;
+			
+			
+			
+			
+		}	
+	}	
+	
+	return result;
+	
+}
+
 void main() {
 	alphaValues[0] = texture(alphaMap, texC).r;
-	alphaValues[1] = texture(alphaMap2, texC).r;
-	alphaValues[2] = texture(alphaMap3, texC).r;
-	alphaValues[3] = texture(alphaMap4, texC).r;
-    alphaValues[4] = texture(alphaMap5, texC).r;
 	
-	float finalAlpha = median();
+	//float finalAlpha = median();
 	//float finalAlpha = alphaValues[0];
+	float finalAlpha = lowPassFilter5x5(texC);
+
 	colorOut = finalAlpha * texture(realColor , texC)  + (1 - finalAlpha) * texture(virtualColor, texC);
-	
+	//colorOut = vec4(finalAlpha, finalAlpha,finalAlpha, 1);
+	//colorOut = texture(realSmoothDepth, texC) * 2;
 }
 
 
