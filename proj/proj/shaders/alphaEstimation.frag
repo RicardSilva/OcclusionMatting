@@ -144,12 +144,12 @@ void main() {
 	}
     colorOut = vec4(0,0,0,1);
 	
-	colorOut = texture(expandedForeground, texC);
+	//colorOut = texture(expandedForeground, texC);
 			
-	//colorOut = vec4(alpha, alpha,alpha, 1);
+	colorOut = vec4(alpha, alpha,alpha, 1);
 	//colorOut = texture(finalTrimap, texC);
 	//if(texture(trimapEdge, texC).a < 1) colorOut = vec4(1,0,0,1);
-	colorOut += texture(unknownLabels, texC);
+	//colorOut += texture(unknownLabels, texC);
 	//colorOut += vec4(texture(realColorEdge, texC)) * 0.5;
 	
 	//colorOut = texture(expandedBackground, texC);

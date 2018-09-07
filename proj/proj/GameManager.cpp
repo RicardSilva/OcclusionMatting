@@ -417,21 +417,21 @@ void GameManager::display() {
 	backgroundPyramid->expandImage();
 	foregroundPyramid->expandImage(); 
 
-	//finalFbos[outputSwitcher]->bindFrameBuffer();
+	finalFbos[outputSwitcher]->bindFrameBuffer();
 	finalOutputShader->use();
 	plane->draw2();
 	finalOutputShader->unUse();
-	//finalFbos[outputSwitcher]->unbindCurrentFrameBuffer();
+	finalFbos[outputSwitcher]->unbindCurrentFrameBuffer();
 	//
-	//glActiveTexture(GL_TEXTURE20 );
-	//glBindTexture(GL_TEXTURE_2D, finalTextures[0]);
+	glActiveTexture(GL_TEXTURE20 );
+	glBindTexture(GL_TEXTURE_2D, finalTextures[0]);
 
-	////glActiveTexture(GL_TEXTURE21);
-	////glBindTexture(GL_TEXTURE_2D, finalTextures[1]);
+	//glActiveTexture(GL_TEXTURE21);
+	//glBindTexture(GL_TEXTURE_2D, finalTextures[1]);
 
-	//finalShader->use();
-	//plane->draw2();
-	//finalShader->unUse();
+	finalShader->use();
+	plane->draw2();
+	finalShader->unUse();
 
 	//outputSwitcher = (outputSwitcher + 1) % 2;
 

@@ -81,8 +81,8 @@ void main() {
 	alphaValues[0] = texture(alphaMap, texC).r;
 	
 	//float finalAlpha = median();
-	float finalAlpha = alphaValues[0];
-	//float finalAlpha = lowPassFilter5x5(texC, alphaMap);
+	//float finalAlpha = alphaValues[0];
+	float finalAlpha = lowPassFilter5x5(texC, alphaMap);
 	
 	colorOut = finalAlpha * texture(realColor , texC)  + (1 - finalAlpha) * texture(virtualColor, texC);
 	//colorOut = vec4(finalAlpha, finalAlpha,finalAlpha, 1);

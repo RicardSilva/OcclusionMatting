@@ -110,7 +110,7 @@ bool expandUnknown3(vec2 coords) {
 		}
 	}
 	
-	int dilationWindow = 2;
+	int dilationWindow = 3;
 	int noEdgeCounter = 0;
 	for(int k = -7; k <= 7; k++) {
 		for(int l = -7; l <= 7; l++) {
