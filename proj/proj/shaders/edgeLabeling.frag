@@ -32,8 +32,9 @@ vec4 labelUnknown(vec4 trimapColor, vec2 coords) {
 	int backHalfCounter = 0;
 	int frontHalfCounter = 0;
 
-	for(int i = -4; i <= 4; i++) {
-		for(int j = -4; j <= 4; j++) {
+	int windowSize = 7;
+	for(int i = -windowSize; i <= windowSize; i++) {
+		for(int j = -windowSize; j <= windowSize; j++) {
 			vec4 color = texture(realColorEdge, coords + vec2(i*offsetX,j*offsetY));
 			if(color.a < 1) {
 				edgePointsCounter++;

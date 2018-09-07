@@ -23,7 +23,7 @@ const float n = 0.8f;
 
 void main(void) {
 	vec4 color;
-	vec4 trimapColor = texture(dilatedTrimap, texC);
+	vec4 trimapColor = texture(finalTrimap, texC);
 	if(mode == 0) {
 		if(trimapColor == vec4(1,1,1,1)) { //WHITE ->	FOREGROUND
 			color = texture(inputTexture, texC);

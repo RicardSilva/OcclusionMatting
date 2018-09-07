@@ -1,5 +1,5 @@
 #include "GameManager.h"
-
+#include <chrono>
 
 bool isOpenGLError() {
 	bool isError = false;
@@ -284,7 +284,7 @@ void GameManager::initGameObjects() {
 
 	shader = ShaderManager::instance()->getShader("lightShader");
 	model = ModelManager::instance()->getModel("cube");
-	cube = new GameObject(vec3(0,0,-730), shader, model);
+	cube = new GameObject(vec3(0,0,-850), shader, model);
 
 	shader = ShaderManager::instance()->getShader("alphaShader");
 	model = ModelManager::instance()->getModel("plane");
@@ -315,7 +315,7 @@ void GameManager::display() {
 
 	
 	finalFbos[outputSwitcher]->bindFrameBuffer();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	finalFbos[outputSwitcher]->unbindCurrentFrameBuffer();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -415,25 +415,29 @@ void GameManager::display() {
 
 
 	backgroundPyramid->expandImage();
-
 	foregroundPyramid->expandImage(); 
 
-	finalFbos[0]->bindFrameBuffer();
+	//finalFbos[outputSwitcher]->bindFrameBuffer();
 	finalOutputShader->use();
 	plane->draw2();
 	finalOutputShader->unUse();
-	finalFbos[0]->unbindCurrentFrameBuffer();
-	
-	glActiveTexture(GL_TEXTURE20 );
-	glBindTexture(GL_TEXTURE_2D, finalTextures[0]);
+	//finalFbos[outputSwitcher]->unbindCurrentFrameBuffer();
+	//
+	//glActiveTexture(GL_TEXTURE20 );
+	//glBindTexture(GL_TEXTURE_2D, finalTextures[0]);
 
-	finalShader->use();
-	plane->draw2();
-	finalShader->unUse();
+	////glActiveTexture(GL_TEXTURE21);
+	////glBindTexture(GL_TEXTURE_2D, finalTextures[1]);
 
+	//finalShader->use();
+	//plane->draw2();
+	//finalShader->unUse();
+
+	//outputSwitcher = (outputSwitcher + 1) % 2;
 
 	glActiveTexture(0);
 	glutSwapBuffers();
+
 }
 
 

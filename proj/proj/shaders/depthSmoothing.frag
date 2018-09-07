@@ -140,8 +140,8 @@ void main() {
 	vec2 v_texcoord = vec2(texC.s, 1.0 - texC.t);
 	//colorOut = vec4(texture(realDepth, v_texcoord).r,0,0,1);
 	//colorOut = lowPassFilter3x3(v_texcoord);
-	colorOut = lowPassFilter5x5(v_texcoord);
-	//colorOut = medianFilter5x5(v_texcoord);
+	//colorOut = lowPassFilter5x5(v_texcoord);
+	colorOut = medianFilter5x5(v_texcoord);
 	
 	
 	

@@ -35,11 +35,9 @@ const float iterations = 5;
 
 float alphaEstimation(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelColor) {
 	float l = length(foregroundColor.rgb - backgroundColor.rgb);
-	//float t =  length(pixelColor.rgb - backgroundColor.rgb);
 	float estimation = (dot((pixelColor.rgb - backgroundColor.rgb),
 			(foregroundColor.rgb - backgroundColor.rgb)))
 			/ (l * l);
-	//if(t > 0.1 && t < 1.7) estimation = 1;
 	return estimation ;
 }
 
@@ -84,7 +82,7 @@ float computeAlpha() {
 	vec4 bestBackground = vec4(0,0,0,1);
 	float alpha = 0;
 	float bestAlpha = 0;
-	int windowSize = 2;
+	int windowSize = 4;
 	for(int i = -windowSize; i <= windowSize; i++) {
 		for(int j = -windowSize; j <= windowSize; j++) {
 			foregroundColor = texture(expandedForeground, texC + vec2(i * offsetX, j * offsetY));
@@ -127,45 +125,36 @@ void main() {
 	
 	vec4 trimapColor = texture(finalTrimap, texC);
 	if(trimapColor == vec4(1,0,0,1)) {//RED -> REAL COLOR
-		colorOut = texture(realColor, texC);
+		//colorOut = texture(realColor, texC);
 		alpha = 1;
 	}
 	else if (trimapColor == vec4(1,1,1,1)) { //WHITE -> REAL COLOR
-		colorOut = texture(realColor, texC);
+		//colorOut = texture(realColor, texC);
 		alpha = 1;
 	}
 	else if (trimapColor == vec4(0,0,0,1)){ //BLACK -> VIRTUAL COLOR
-		colorOut = texture(virtualColor, texC);
+		//colorOut = texture(virtualColor, texC);
 		alpha = 0;
 	}
 	 if (trimapColor.a < 1) {	//UNKNOWN -> compute best color
 		alpha = computeAlpha();
-		colorOut = alpha * texture(realColor , texC)  + (1 - alpha) * texture(virtualColor, texC) * 1.5;
+		//colorOut = alpha * texture(realColor , texC)  + (1 - alpha) * texture(virtualColor, texC) * 1.5;
 		
 		//colorOut = vec4(0,1,0,1);
 	}
-	//colorOut = vec4(0,0,0,1);
+    colorOut = vec4(0,0,0,1);
 	
-	//colorOut.r = length(texture(realColor, texC).rgb 
-	//	- (alpha * (texture(expandedForeground, texC).rgb) 
-	//		+ ((1-alpha) * texture(expandedBackground, texC).rgb)));
-
-	
-	
-	//colorOut = vec4(0,0,0,1);
-	//colorOut.r =  dot((texture(realColor, texC).rgb - texture(expandedBackground, texC).rgb),
-	//		(texture(expandedForeground, texC).rgb - texture(expandedBackground, texC).rgb));
-	
+	colorOut = texture(expandedForeground, texC);
 			
-	colorOut = vec4(alpha, alpha,alpha, 1);
+	//colorOut = vec4(alpha, alpha,alpha, 1);
 	//colorOut = texture(finalTrimap, texC);
 	//if(texture(trimapEdge, texC).a < 1) colorOut = vec4(1,0,0,1);
-	//colorOut = texture(unknownLabels, texC);
-	//colorOut += vec4(0, texture(realColorEdge, texC).r + texture(realColorEdge, texC).g + texture(realColorEdge, texC).b ,0,1 ) * 0.1;
-	//colorOut = texture(expandedForeground, texC);
+	colorOut += texture(unknownLabels, texC);
+	//colorOut += vec4(texture(realColorEdge, texC)) * 0.5;
 	
+	//colorOut = texture(expandedBackground, texC);
 	//colorOut = texture(dilatedTrimap, texC);
-	
+	//colorOut = vec4(0,0,0,1);
 	//colorOut = texture(realColor, texC);
 	//colorOut = vec4(texture(realSmoothDepth, texC).rrr, 1) * 5;
 	
@@ -179,8 +168,8 @@ void main() {
 		if(alpha == 2) colorOut = vec4(0,1,0,1);
 		else colorOut = vec4(alpha, alpha,alpha, 1);
 	else if(texC.s > 0.5 && texC.t > 0.5 )
-		colorOut = texture(realColor, texC * 2);*/
-	
+		colorOut = texture(realColor, texC * 2);
+	*/
 }
 
 

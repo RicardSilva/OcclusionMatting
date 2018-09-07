@@ -97,6 +97,70 @@ for(int i = -windowSize; i <= windowSize; i++) {
 	return false;
 }
 
+bool expandUnknown3(vec2 coords) {
+	
+	//dilate unknown depth line by 1
+	int windowSize = 1;
+	for(int i = -windowSize; i <= windowSize; i++) {
+		for(int j = -windowSize; j <= windowSize; j++) {
+			vec4 trimapColor = texture(trimapEdge, coords + vec2(i * offsetX, j* offsetY));
+			if(trimapColor.a < 1) {
+				return true;
+			}
+		}
+	}
+	
+	int dilationWindow = 2;
+	int noEdgeCounter = 0;
+	for(int k = -7; k <= 7; k++) {
+		for(int l = -7; l <= 7; l++) {
+			if(texture(unknownLabels, coords + vec2(k * offsetX, l * offsetY)) == vec4(0,0,1,1)) {
+				noEdgeCounter++;
+			}
+			
+		}
+	}
+	if(noEdgeCounter > 2) dilationWindow = 8;
+	
+	//dilate towards color line					
+	for(int i = -dilationWindow; i <= dilationWindow; i++) {
+		for(int j = -dilationWindow; j <= dilationWindow; j++) {
+			vec4 trimapColor = texture(trimapEdge, coords + vec2(i * offsetX, j * offsetY));
+			if(trimapColor.a < 1) {
+				vec4 label = texture(unknownLabels, coords + vec2(i * offsetX, j * offsetY));
+				if(label == vec4(1,0,0,1)) { //front half space -> RED 
+					vec2 unknownPixelDirection = vec2(trimapColor.r * 2 - 1, trimapColor.g * 2 - 1);
+					if(dot(unknownPixelDirection, vec2(i, j)) < 0) {
+						//frontHalf
+							return true;
+					}
+					else {
+						//backHalf -> do nothing
+					}
+				} 
+				else if(label == vec4(0,1,0,1)) { //back half space -> GREEN
+					vec2 unknownPixelDirection = vec2(trimapColor.r * 2 - 1, trimapColor.g * 2 - 1);
+					if(dot(unknownPixelDirection, vec2(i, j)) >= 0) {
+						//frontHalf -> do nothing
+					}
+					else {
+						//backHalf
+						return true;
+					}
+				}
+				else if(label == vec4(0,0,1,1)) { //no edge -> BLUE
+					//do nothing
+				}
+				
+				
+			}	
+		}
+	}
+	
+	//no unknown pixels in search region or not in relevant half
+	return false;
+}
+
 
 void main() {
 			
@@ -112,7 +176,7 @@ void main() {
 		colorOut = vec4(0.5,0.5,0.5,0.9); // unknown -> grey
 	}
 	else {
-		if(expandUnknown(texC) == true) {
+		if(expandUnknown3(texC) == true) {
 			colorOut = vec4(0.5,0.5,0.5,0.9); // unknown -> grey
 		}
 		else {
