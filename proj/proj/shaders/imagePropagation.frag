@@ -9,7 +9,6 @@ layout(location = 0) out vec4 colorOut;
 
 
 uniform sampler2D finalTrimap;
-uniform sampler2D dilatedTrimap;
 
 uniform sampler2D inputTexture; // INPUT TEXTURE
 uniform layout(rgba32f) writeonly image2D outputImage;

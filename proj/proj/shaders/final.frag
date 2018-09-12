@@ -77,15 +77,35 @@ float lowPassFilter5x5(vec2 coords, sampler2D sampler) {
 	
 }
 
+float lowPassFilterRough5x5(vec2 coords, sampler2D sampler) {
+	float thisAlpha = texture(sampler, coords).r;
+	float result = 0.0;
+	int size = 2;
+	for(int i = -size; i <= size; i++) {
+		for(int j = -size; j <= size; j++) {
+			
+			float d = texture(sampler, coords + vec2(i * offsetX, j * offsetY)).r;
+			result += d / 25.0;
+			
+			
+			
+			
+		}	
+	}	
+	
+	return result;
+	
+}
+
 void main() {
 	alphaValues[0] = texture(alphaMap, texC).r;
 	
 	//float finalAlpha = median();
 	//float finalAlpha = alphaValues[0];
-	float finalAlpha = lowPassFilter5x5(texC, alphaMap);
+	float finalAlpha = lowPassFilterRough5x5(texC, alphaMap);
 	
 	colorOut = finalAlpha * texture(realColor , texC)  + (1 - finalAlpha) * texture(virtualColor, texC);
-	//colorOut = vec4(finalAlpha, finalAlpha,finalAlpha, 1);
+	colorOut = vec4(finalAlpha, finalAlpha,finalAlpha, 1);
 	//colorOut = texture(realSmoothDepth, texC) * 2;
 }
 

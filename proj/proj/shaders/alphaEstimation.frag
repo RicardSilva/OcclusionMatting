@@ -59,7 +59,7 @@ float objectiveFunction(vec4 foregroundColor, vec4 backgroundColor, vec4 pixelCo
 	//find min of sum of color cost with propagation cost around the pixel
 	
 	
-	float weight = 0.2f;
+	float weight = 5f;
 	return weight * colorCost(foregroundColor, backgroundColor, pixelColor, alpha) 
 	+ propagationCost(foregroundCost, backgroundCost);
 	
@@ -156,7 +156,7 @@ void main() {
 	//colorOut = texture(dilatedTrimap, texC);
 	//colorOut = vec4(0,0,0,1);
 	//colorOut = texture(realColor, texC);
-	//colorOut = vec4(texture(realSmoothDepth, texC).rrr, 1) * 5;
+	colorOut = vec4(texture(realSmoothDepth, texC).rrr, 1) * 5;
 	
 	//colorOut = texture(propagationCostsBackground, texC);
 	

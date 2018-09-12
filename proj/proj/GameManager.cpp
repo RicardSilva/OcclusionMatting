@@ -118,15 +118,10 @@ void GameManager::initFrameBuffers() {
 	finalTrimapTexture = finalTrimapFbo->getColorTexture();
 	frameBuffers.push_back(finalTrimapFbo);
 
-	dilatedFbo = new FrameBuffer(WIDTH, HEIGHT);
-	dilatedTrimap = dilatedFbo->getColorTexture();
-	frameBuffers.push_back(dilatedFbo);
-
-	for (int i = 0; i < 10; i++) {
-		finalFbos[i] = new FrameBuffer(WIDTH, HEIGHT);
-		finalTextures[i] = finalFbos[i]->getColorTexture();
-		
-	}
+	finalFbo = new FrameBuffer(WIDTH, HEIGHT);
+	finalTexture = finalFbo->getColorTexture();
+	frameBuffers.push_back(finalFbo);
+	
 
 
 
@@ -152,11 +147,6 @@ void GameManager::initShaders() {
 	coarseTrimapShader->bindTextureUnits();
 	coarseTrimapShader->unUse();
 	ShaderManager::instance()->addShader("coarseTrimap", coarseTrimapShader);
-	coarseTrimapShader2 = new AlphaShader("shaders/alphaMatting.vert", "shaders/coarseTrimap2.frag");
-	coarseTrimapShader2->use();
-	coarseTrimapShader2->bindTextureUnits();
-	coarseTrimapShader2->unUse();
-	ShaderManager::instance()->addShader("coarseTrimap2", coarseTrimapShader2);
 
 
 	edgeDetectionShader = new AlphaShader("shaders/alphaMatting.vert", "shaders/edgeDetection.frag");
@@ -305,6 +295,9 @@ void GameManager::update(double timeStep) {
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, CWIDTH, CHEIGHT, GL_RED, GL_FLOAT, (float*)depthData);
 }
 void GameManager::display() {	
+
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
 	FrameCount++;
 	glClearColor(1,1,1,0);
 	for (auto fbo : frameBuffers) {
@@ -312,11 +305,6 @@ void GameManager::display() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		fbo->unbindCurrentFrameBuffer();
 	}
-
-	
-	finalFbos[outputSwitcher]->bindFrameBuffer();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	finalFbos[outputSwitcher]->unbindCurrentFrameBuffer();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -404,36 +392,31 @@ void GameManager::display() {
 	glActiveTexture(GL_TEXTURE9);
 	glBindTexture(GL_TEXTURE_2D, finalTrimapTexture);
 
-	dilatedFbo->bindFrameBuffer();
-	coarseTrimapShader2->use();
-	plane->draw2();
-	coarseTrimapShader2->unUse();
-	dilatedFbo->unbindCurrentFrameBuffer();
-
-	glActiveTexture(GL_TEXTURE18);
-	glBindTexture(GL_TEXTURE_2D, dilatedTrimap);
-
 
 	backgroundPyramid->expandImage();
 	foregroundPyramid->expandImage(); 
 
-	finalFbos[outputSwitcher]->bindFrameBuffer();
+	//finalFbo->bindFrameBuffer();
 	finalOutputShader->use();
 	plane->draw2();
 	finalOutputShader->unUse();
-	finalFbos[outputSwitcher]->unbindCurrentFrameBuffer();
-	//
+	//finalFbo->unbindCurrentFrameBuffer();
+
 	glActiveTexture(GL_TEXTURE20 );
-	glBindTexture(GL_TEXTURE_2D, finalTextures[0]);
+	glBindTexture(GL_TEXTURE_2D, finalTexture);
 
-	//glActiveTexture(GL_TEXTURE21);
-	//glBindTexture(GL_TEXTURE_2D, finalTextures[1]);
 
-	finalShader->use();
-	plane->draw2();
-	finalShader->unUse();
+	//finalShader->use();
+	//plane->draw2();
+	//finalShader->unUse();
 
-	//outputSwitcher = (outputSwitcher + 1) % 2;
+
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+
+	std::cout << "It took me " << time_span.count() << " seconds.";
+	std::cout << std::endl;
 
 	glActiveTexture(0);
 	glutSwapBuffers();

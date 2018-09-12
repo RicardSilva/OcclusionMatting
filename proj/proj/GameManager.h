@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include "time.h"
+#include <chrono>
 
 #include "PerspectiveCamera.h"
 
@@ -29,6 +30,8 @@
 #include <Ole2.h>
 #include <Windows.h>
 #include <Kinect.h>
+
+using namespace std::chrono;
 
 
 #define DWIDTH 512
@@ -56,7 +59,6 @@ class GameManager {
 	Shader* depthSmoothingShader;
 	Shader* invertRealColorShader;
 	Shader* coarseTrimapShader;
-	Shader* coarseTrimapShader2;
 	Shader* edgeDetectionShader;
 	Shader* colorEdgeDetectionShader;
 	Shader* edgeLabelingShader;
@@ -82,8 +84,7 @@ class GameManager {
 	FrameBuffer* realColorEdgeFbo;
 	FrameBuffer* unknownLabelsFbo;
 	FrameBuffer* finalTrimapFbo;
-	FrameBuffer* finalFbos[10];
-	FrameBuffer* dilatedFbo;
+	FrameBuffer* finalFbo;
 
 
 	GLuint virtualColorTexture;
@@ -98,8 +99,7 @@ class GameManager {
 	GLuint realColorEdgeTexture;
 	GLuint unknownLabelsTexture;
 	GLuint finalTrimapTexture;	
-	GLuint finalTextures[10];
-	GLuint dilatedTrimap;
+	GLuint finalTexture;
 
 
 	// Intermediate Buffers

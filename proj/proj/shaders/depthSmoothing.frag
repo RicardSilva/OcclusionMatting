@@ -24,7 +24,7 @@ const float offsetY = 1.0 / resY;
 float depthValues[25];
 
 void bubbleSort(int size) {
-	int items_to_sort = size / 2 + 1;
+	int items_to_sort = size / 2 + 2;
     for(int k = 0; k < items_to_sort; k++) {
         for(int j = 0; j < size - 1 - k; j++) {
             if(depthValues[j] > depthValues[j + 1]) {
@@ -122,6 +122,30 @@ vec4 lowPassFilter5x5(vec2 coords) {
 	
 }
 
+vec4 averageMedian(vec2 coords) {
+	float thisDepth = texture(realDepth, coords).r;
+	if(thisDepth == -1.0) {
+		return vec4(0,1,0,1);
+	}
+	int counter = 0;
+    for (int i = -2; i <= 2; i++) {
+		for (int j = -2; j <= 2; j++) {
+			depthValues[counter++] = texture(realDepth, coords + vec2(i * offsetX, j * offsetY)).r;
+			
+		}
+    }
+
+    bubbleSort(25);
+	float result = depthValues[11] + depthValues[12] + depthValues[13];
+	result /= 3.0f;
+	if(result == -1.0) {
+		return vec4(0,1,0,1);
+	}
+		
+	return vec4(result, 0,0,1);
+	
+}
+
 
 void main() {
 		
@@ -141,7 +165,8 @@ void main() {
 	//colorOut = vec4(texture(realDepth, v_texcoord).r,0,0,1);
 	//colorOut = lowPassFilter3x3(v_texcoord);
 	//colorOut = lowPassFilter5x5(v_texcoord);
-	colorOut = medianFilter5x5(v_texcoord);
+	//colorOut = medianFilter5x5(v_texcoord);
+	colorOut = averageMedian(v_texcoord);
 	
 	
 	

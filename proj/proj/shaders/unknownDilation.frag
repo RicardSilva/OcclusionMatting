@@ -120,7 +120,7 @@ bool expandUnknown3(vec2 coords) {
 			
 		}
 	}
-	if(noEdgeCounter > 2) dilationWindow = 8;
+	if(noEdgeCounter > 2) dilationWindow = 5;
 	
 	//dilate towards color line					
 	for(int i = -dilationWindow; i <= dilationWindow; i++) {
@@ -130,7 +130,7 @@ bool expandUnknown3(vec2 coords) {
 				vec4 label = texture(unknownLabels, coords + vec2(i * offsetX, j * offsetY));
 				if(label == vec4(1,0,0,1)) { //front half space -> RED 
 					vec2 unknownPixelDirection = vec2(trimapColor.r * 2 - 1, trimapColor.g * 2 - 1);
-					if(dot(unknownPixelDirection, vec2(i, j)) < 0) {
+					if(dot(unknownPixelDirection, vec2(i, j)) >= 0) {
 						//frontHalf
 							return true;
 					}
@@ -140,12 +140,13 @@ bool expandUnknown3(vec2 coords) {
 				} 
 				else if(label == vec4(0,1,0,1)) { //back half space -> GREEN
 					vec2 unknownPixelDirection = vec2(trimapColor.r * 2 - 1, trimapColor.g * 2 - 1);
-					if(dot(unknownPixelDirection, vec2(i, j)) >= 0) {
-						//frontHalf -> do nothing
+					if(dot(unknownPixelDirection, vec2(i, j)) < 0) {
+						
+						return true;
 					}
 					else {
-						//backHalf
-						return true;
+						//do nothing
+						
 					}
 				}
 				else if(label == vec4(0,0,1,1)) { //no edge -> BLUE
